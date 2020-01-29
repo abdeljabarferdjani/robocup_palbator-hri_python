@@ -34,7 +34,8 @@ class GoTo:
                 "data": {
                     'textToShow': text,
                     'location': locations
-                }
+                },
+                "step":arguments ## For putOneStep
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)

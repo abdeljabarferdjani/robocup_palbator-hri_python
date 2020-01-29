@@ -19,7 +19,8 @@ class SeatGuest:
                 "view": js_view_key,
                 "data": {
                     'textToShow': text,
-                }
+                },
+                "step":arguments ## For putOneStep
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 

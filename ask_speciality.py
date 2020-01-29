@@ -25,8 +25,8 @@ class AskSpeciality:
                 "data": {
                     'textToShow': text,
                     'names' : names
-                }
-                # "step":arguments
+                },
+                "step":arguments
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)

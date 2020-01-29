@@ -25,8 +25,8 @@ class DisplayInfo:
                         'title': text,
                         'description': [desc]
                     }
-                }
-                # "step":arguments
+                },
+                "step":arguments
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 

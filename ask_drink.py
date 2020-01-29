@@ -28,7 +28,8 @@ class AskDrink:
                 "data": {
                     'textToShow': text,
                     'drinks' : drinks
-                }
+                },
+                "step":arguments ## For putOneStep
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)

@@ -172,7 +172,8 @@ def stepToStart(json,index,dataToUse):
     Views.start(step['action'],step, index, dataToUse)
   else:
     dataJsonToSendCurrentStep = {
-        "index": index
+        "index": index,
+        "step":step
     }
     socketIO.emit('stepCurrent',dataJsonToSendCurrentStep,broadcast=True)
     dataJsonToSendTimer = {

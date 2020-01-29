@@ -22,7 +22,8 @@ class Confirm:
                 "view": js_view_key,
                 "data": {
                     'textToShow': text
-                }
+                },
+                "step":arguments ## For putOneStep
         }
         print('le data emit dans confirm est', dataJsonToSendCurrentView)
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)

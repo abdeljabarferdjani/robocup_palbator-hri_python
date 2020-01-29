@@ -20,7 +20,8 @@ class Wait:
                 "data": {
                     'textToShow': text,
                     'time' : time
-                }
+                },
+                "step":arguments ## For putOneStep
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
