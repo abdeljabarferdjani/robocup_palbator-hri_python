@@ -21,6 +21,7 @@ class AskSomething:
 
         text = arguments['speech']['title']
 
+        print('we go in ask something')
         if js_view_key == 'askDrink':
 
             drinks = drink
