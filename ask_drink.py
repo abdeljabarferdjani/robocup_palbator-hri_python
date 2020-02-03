@@ -21,7 +21,7 @@ class AskDrink:
         AskDrink.drinks = drinks
         
         text = arguments['speech']['title']
-        # text = text.format(name=name)
+
 
         dataJsonToSendCurrentView = {
                 "view": js_view_key,

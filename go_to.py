@@ -27,7 +27,7 @@ class GoTo:
 
         locations = arguments['arguments']['location']
         text = arguments['speech']['title']
-        print('------------------------ on rentre dans GO TO ----------------------')
+
 
         dataJsonToSendCurrentView = {
                 "view": js_view_key,

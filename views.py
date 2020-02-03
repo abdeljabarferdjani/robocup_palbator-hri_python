@@ -3,6 +3,7 @@ from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, send, emit
 from __main__ import socketIO
 from ask_age import AskAge
+from ask_something import AskSomething
 from ask_drink import AskDrink
 from ask_name import AskName
 from ask_speciality import AskSpeciality
@@ -24,9 +25,10 @@ class Views:
     current_scenario = None
     action_class_map = {
         'askAge': AskAge,
-        'askDrink': AskDrink,
-        'askName': AskName,
-        'askSpeciality': AskSpeciality,
+        'askDrink': AskDrink, # Generic with askSomething
+        'askSomething': AskSomething,
+        'askName': AskName, # Generic with askSomething
+        'askSpeciality': AskSpeciality, # Generic with askSomething
         'displayInfo': DisplayInfo,
         'askOpenDoor': AskOpenDoor, # textToPrint
         'askToFollow': AskToFollow, # 
@@ -51,7 +53,12 @@ class Views:
         if step_name in Views.action_class_map and Views.action_class_map[step_name]:
             try:
                 Views.last_action = step_name
-                Views.action_class_map[step_name].start(step_name, arguments,index,dataToUse)
+                if( step_name == 'askDrink' or step_name == 'askSpeciality' or step_name == 'askName'):
+                    Views.action_class_map['askSomething'].start(step_name, arguments,index,dataToUse)
+                if( step_name == 'displayInfo' or step_name == 'askOpenDoor'):
+                    Views.action_class_map['displayInfo'].start(step_name, arguments,index,dataToUse)
+                else:
+                    Views.action_class_map[step_name].start(step_name, arguments,index,dataToUse)
             except RuntimeError as ex:
                 Views.last_action = None
         else:
