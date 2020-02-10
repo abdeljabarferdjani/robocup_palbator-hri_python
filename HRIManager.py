@@ -10,7 +10,7 @@ from views import Views
 
 
   
-with open('templates/public/json/present_school/scenario.json') as pres_school:
+with open('templates/public/json/present_school_test/scenario.json') as pres_school:
     presentSchool = json.load(pres_school)
     presentSchool['name']='present_school'
 
@@ -45,9 +45,11 @@ def load_scenario_json(json):
 
 finalStep = None
 currentStep = None
+currentAction = None
 index=0
 indexStepCompleted=0
 dataToUse=''
+indexFailure=None
 print("index global",index)
 
 ####### On a en parametre, un json provenant du REACT qui contient la liste des steps ordonnees ainsi que le nom du scenario #########
@@ -98,7 +100,11 @@ def updateNextStep(indexForNextStep):
 
 def updatePreviousStep(indexForPreviousStep):
   global index
-  index =indexForPreviousStep-1
+  global indexFailure
+  if(indexFailure != None):
+    index =indexFailure
+  else:
+    index=indexForPreviousStep-1
 
 # On a le current step en json et son index afin de start la vue approprie
 # Si le step n a pas d action, c est que c est le titre d une etape.
@@ -109,6 +115,11 @@ def updatePreviousStep(indexForPreviousStep):
 def stepToStart(json,index,dataToUse):
   step = json
   # print('---------- STEP DANS STEPTOSTART ------',step)
+  global indexFailure
+  global currentAction
+  currentAction = step['action']
+  if(step['action'] == 'confirm' and 'indexFailure' in step): 
+    indexFailure = step['indexFailure']
   if step['action'] != '':
     Views.start(step['action'],step, index, dataToUse)
   else:
@@ -146,9 +157,10 @@ def chargeScenario(json):
 def dataJSstepDone(json):
   global index
   global dataToUse
-  dataToUse = json['data']
-  print(dataToUse)
-  if(dataToUse != 'false' ):
+  global currentAction
+  if(currentAction != 'confirm'):
+    dataToUse = json['data']
+  if(json['data'] != 'false'):
     updateNextStep(index)
   else:
     updatePreviousStep(index)

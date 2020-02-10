@@ -25,7 +25,7 @@ class Confirm:
                 },
                 "step":arguments ## For putOneStep
         }
-        print('le data emit dans confirm est', dataJsonToSendCurrentView)
+        
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
     # @staticmethod
