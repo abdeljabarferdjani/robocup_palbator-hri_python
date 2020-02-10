@@ -13,8 +13,7 @@ class AskOpenDoor:
 
         text = arguments['speech']['title']
         desc = arguments['speech']['description']
-        #######
-        print(arguments)
+        
         dataJsonToSendCurrentView = {
                 "view": js_view_key,
                 "data": {
@@ -25,6 +24,7 @@ class AskOpenDoor:
                 },
                 "step":arguments ## For putOneStep
         }
+
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         
 

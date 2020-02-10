@@ -53,12 +53,14 @@ class Views:
         if step_name in Views.action_class_map and Views.action_class_map[step_name]:
             try:
                 Views.last_action = step_name
+                js_view_key = step_name
                 if( step_name == 'askDrink' or step_name == 'askSpeciality' or step_name == 'askName'):
-                    Views.action_class_map['askSomething'].start(step_name, arguments,index,dataToUse)
+                    # Views.action_class_map['askSomething'].start(step_name, arguments,index,dataToUse)
+                    step_name = 'askSomething'
                 if( step_name == 'displayInfo' or step_name == 'askOpenDoor'):
-                    Views.action_class_map['displayInfo'].start(step_name, arguments,index,dataToUse)
-                else:
-                    Views.action_class_map[step_name].start(step_name, arguments,index,dataToUse)
+                    # Views.action_class_map['displayInfo'].start(step_name, arguments,index,dataToUse)
+                    step_name = 'displayInfo'
+                Views.action_class_map[step_name].start(js_view_key, arguments,index,dataToUse)
             except RuntimeError as ex:
                 Views.last_action = None
         else:

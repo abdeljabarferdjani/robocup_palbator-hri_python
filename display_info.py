@@ -31,6 +31,7 @@ class DisplayInfo:
                 },
                 "step":arguments
         }
+
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
     # @staticmethod

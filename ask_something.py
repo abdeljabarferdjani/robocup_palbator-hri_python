@@ -21,7 +21,6 @@ class AskSomething:
 
         text = arguments['speech']['title']
 
-        print('we go in ask something')
         if js_view_key == 'askDrink':
 
             drinks = drink
@@ -33,7 +32,8 @@ class AskSomething:
                     "data": {
                         'textToShow': text,
                         'drinks' : drinks
-                    }
+                    },
+                    "step":arguments
             }
 
         if js_view_key == 'askName':
@@ -45,7 +45,8 @@ class AskSomething:
                     "data": {
                         'textToShow': text,
                         'names' : names
-                    }
+                    },
+                    "step":arguments
             }
 
         if js_view_key == 'askSpeciality':
@@ -57,8 +58,8 @@ class AskSomething:
                     "data": {
                         'textToShow': text,
                         'names' : names
-                    }
-                    # "step":arguments
+                    },
+                    "step":arguments
             }
 
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
