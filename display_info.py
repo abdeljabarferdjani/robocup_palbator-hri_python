@@ -10,11 +10,14 @@ class DisplayInfo:
     @staticmethod
     def start(js_view_key, arguments, index, dataToUse):
 
-        print(dataToUse)
+        if(dataToUse != 'ETI' and dataToUse != 'CGP'):
+            desc = arguments['speech']['description']
+    
         if(dataToUse == 'ETI'):
             desc=arguments['speech']['description1']
         if(dataToUse == 'CGP'):
             desc=arguments['speech']['description2']
+        
 
         text = arguments['speech']['title']
         

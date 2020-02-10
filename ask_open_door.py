@@ -9,20 +9,7 @@ global stepCompletedJson
 class AskOpenDoor:
     @staticmethod
     def start(js_view_key, arguments, index, dataToUse):
-        # AskOpenDoor.action_id = arg_fetcher.get_argument(arguments, 'id')
-        # if not AskOpenDoor.action_id:
-        #     # logger.log("Missing id in {0} action arguments".format(js_view_key), "Views Manager", logger.ERROR)
-        #     # local_manager.send_view_result(js_view_key, {'error': 400})
-        #     print('error 400')
-        
-        ##########
 
-        # args = arg_fetcher.get_argument(arguments, 'args')
-        # speech = arg_fetcher.get_argument(args, 'speech')
-        
-        # text = arg_fetcher.get_argument(speech, 'title')
-        # said = arg_fetcher.get_argument(speech, 'said')
-        # desc = arg_fetcher.get_argument(speech, 'description')
 
         text = arguments['speech']['title']
         desc = arguments['speech']['description']

@@ -73,65 +73,6 @@ def updateCurrentStep(json):
         socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
         indexStepCompleted = currentStep['order']
 
-      ####
-      # if json['scenario_name'] == 'receptionist':
-      #   if currentStep['id'] == 'AskInfoG1':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 4
-      #   if currentStep['id'] == 'GotoLR1':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 10
-      #   if currentStep['id'] == 'IntroduceG1ToJohn':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 13
-      #   if currentStep['id'] == 'IntroduceJohnToG1':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 16
-      #   if currentStep['id'] == 'SeatG1':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 19
-
-        ##################################### STEP COMPLETED PUSH FOR PRESENT SCHOOL SCENARIO
-
-      # if json['scenario_name'] == 'present_school':
-      #   if currentStep['id'] == 'DisplayInfNavigate':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 3
-      #   if currentStep['id'] == 'FinishScenario':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 7
-
-        #####################################
-
-        ##################################### STEP COMPLETED PUSH FOR CREATION SCENARIO
-
-      # if json['scenario_name'] == 'creation_test':
-      #   if currentStep['id'] == 'welcomeMessage_id':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 2
-      #   if currentStep['id'] == 'displayName_id':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 4
-      #   if currentStep['id'] == 'last_wait_id':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 6
-      #   if currentStep['id'] == 'FinishScenario':
-      #     stepCompletedJson = {"idSteps": indexStepCompleted}
-      #     socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-      #     indexStepCompleted = 8
-
-        #####################################
-
       if (currentStep != None and currentStep != lastStep):
         stepToStart(currentStep,index,dataToUse)
         lastStep=currentStep
