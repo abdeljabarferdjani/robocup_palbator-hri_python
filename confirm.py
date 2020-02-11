@@ -15,9 +15,13 @@ class Confirm:
         #     logger.log("Missing id in {0} action arguments".format(js_view_key), "Views Manager", logger.ERROR)
         #     local_manager.send_view_result(js_view_key, {'error': 400})
         
-        
-        text = arguments['speech']['title']
 
+        text = arguments['speech']['title']
+        if text and "{drink}" in text:
+            text = text.format(drink=dataToUse)
+        if text and "{name}" in text:
+            text = text.format(name=dataToUse)
+        
         dataJsonToSendCurrentView = {
                 "view": js_view_key,
                 "data": {
@@ -25,7 +29,7 @@ class Confirm:
                 },
                 "step":arguments ## For putOneStep
         }
-        
+
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
     # @staticmethod

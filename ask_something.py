@@ -20,7 +20,7 @@ class AskSomething:
     def start(js_view_key, arguments, index, dataToUse):
 
         text = arguments['speech']['title']
-
+    
         if js_view_key == 'askDrink':
 
             drinks = drink
@@ -50,14 +50,14 @@ class AskSomething:
             }
 
         if js_view_key == 'askSpeciality':
-            names = speciality
-            AskSomething.names = names
+            name = speciality
+            AskSomething.name = name
             
             dataJsonToSendCurrentView = {
                     "view": 'askSomething',
                     "data": {
                         'textToShow': text,
-                        'names' : names
+                        'names' : name
                     },
                     "step":arguments
             }
