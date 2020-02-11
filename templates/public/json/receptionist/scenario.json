@@ -624,14 +624,6 @@
       "arguments": {},
       "action": "",
       "id": "FinishScenario"
-    },
-    {
-      "name": "Finish Scenario",
-      "order": 52,
-      "eta": 0,
-      "arguments": {},
-      "action": "finishScenario",
-      "id": "finishscenario_finish-scenario"
     }
   ],
   "name": "Receptionist"

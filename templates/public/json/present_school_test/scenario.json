@@ -116,14 +116,6 @@
       "arguments": {},
       "action": "",
       "id": "FinishScenario"
-    },
-    {
-      "name": "Finish Scenario",
-      "order": 9,
-      "eta": 0,
-      "arguments": {},
-      "action": "finishScenario",
-      "id": "finishscenario_finish-scenario"
     }
   ],
   "name": "Present School"

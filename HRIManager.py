@@ -80,19 +80,7 @@ def updateCurrentStep(json):
         lastStep=currentStep
       socketIO.wait(seconds=0.1)
       currentStep = json['data'][index]
-
-  # dataJsonToSendScenario = {
-  #     "scenario": 'None',
-  #     "stepsList": []
-  # }
-  # socketIO.emit('scenarioToEnd',dataJsonToSendScenario, broadcast=True)
-  # # global index
-  # finalStep = None
-  # currentStep = None
-  # index=0
-  # indexStepCompleted=0
-  # dataToUse=''
-
+  restart_hri()
 
 def updateNextStep(indexForNextStep):
   global index
@@ -128,10 +116,11 @@ def stepToStart(json,index,dataToUse):
         "step":step
     }
     socketIO.emit('stepCurrent',dataJsonToSendCurrentStep,broadcast=True)
-    dataJsonToSendTimer = {
-        "state": 'TOGGLE_TIMER/ON'
-    }
-    socketIO.emit('startTimer',dataJsonToSendTimer, broadcast=True)
+    if step['id'] != 'FinishScenario':
+      dataJsonToSendTimer = {
+          "state": 'TOGGLE_TIMER/ON'
+      }
+      socketIO.emit('startTimer',dataJsonToSendTimer, broadcast=True)
     updateNextStep(index)
 
 ########################## Chargement du scenario selectionne ################
@@ -165,6 +154,28 @@ def dataJSstepDone(json):
   else:
     updatePreviousStep(index)
 ###########################
+
+
+def restart_hri():
+  socketIO.emit('restartHRI',broadcast=True)
+  global finalStep
+  finalStep = None
+  global currentStep
+  currentStep = None
+  global currentAction
+  currentAction = None
+  global index
+  index=0
+  global indexStepCompleted
+  indexStepCompleted=0
+  global dataToUse
+  dataToUse=''
+  global indexFailure
+  indexFailure=None
+
+
+
+#############
 
 socketIO.on('askToChangeScenarioHRIM', chargeScenario)
 socketIO.on('scenarioCharged', updateCurrentStep)

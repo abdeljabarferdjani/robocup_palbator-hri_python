@@ -62,10 +62,10 @@ def handle_my_custom_event(json):
 def handle_my_custom_event(json):
     emit('dataReceivedJS',json,broadcast=True)
 
-@socketio.on('scenarioToEnd')
+@socketio.on('restartHRI')
 @cross_origin()
-def handle_my_custom_event(json):
-    emit('endScenario',json,broadcast=True)
+def handle_my_custom_event():
+    emit('endScenario',broadcast=True)
 
 #### FROM HRIM to REACT #### STEP 9 On recoit depuis le HRIM l index de l etape finie et on l envoie au REACT
 ### On reboucle ensuite sur STEP 5 et 6
