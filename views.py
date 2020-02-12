@@ -49,16 +49,14 @@ class Views:
 
 
     @staticmethod
-    def start(step_name, arguments,  index, dataToUse):
+    def start(HRIManager,step_name, arguments,  index, dataToUse):
         if step_name in Views.action_class_map and Views.action_class_map[step_name]:
             try:
                 Views.last_action = step_name
                 js_view_key = step_name
                 if( step_name == 'askDrink' or step_name == 'askSpeciality' or step_name == 'askName'):
-                    # Views.action_class_map['askSomething'].start(step_name, arguments,index,dataToUse)
                     step_name = 'askSomething'
                 if( step_name == 'displayInfo' or step_name == 'askOpenDoor'):
-                    # Views.action_class_map['displayInfo'].start(step_name, arguments,index,dataToUse)
                     step_name = 'displayInfo'
                 Views.action_class_map[step_name].start(js_view_key, arguments,index,dataToUse)
             except RuntimeError as ex:
@@ -66,32 +64,5 @@ class Views:
         else:
           print('no action found')
           print(step_name)
+          HRIManager.restart_hri()
 
-
-    # @staticmethod
-    # def received_data(local_manager, data):
-    #     if Views.last_action:
-    #         try:
-    #             logger.log('Received data on "' + str(Views.last_action) + '"', "QiChat", logger.DEBUG)
-    #             result = Views.action_class_map[Views.last_action].received_data(local_manager, data)
-    #             logger.log('Processed data on "' + str(Views.last_action) + '"', "QiChat", logger.DEBUG)
-
-    #             if result:
-    #                 local_manager.send_view_result(Views.last_action, result)
-    #                 logger.log("Sent on ActionComplete: " + str({'ok': Views.last_action}), "Views Manager", logger.DEBUG)
-    #         except RuntimeError as ex:
-    #             logger.log('An error occured while processing data on "' + Views.last_action + '":\n' + str(ex), "Views Manager", logger.ERROR)
-    #             local_manager.send_view_result(Views.last_action, {'id': Views.last_action.action_id, 'error': "500"})
-                
-
-    # @staticmethod
-    # def stop(local_manager):
-    #     if Views.last_action:
-    #         try:
-    #             logger.log('Unloading "' + str(Views.last_action) + '"', "QiChat", logger.DEBUG)
-    #             Views.action_class_map[Views.last_action].stop(local_manager)
-    #             logger.log('Unloaded "' + str(Views.last_action) + '"', "QiChat", logger.DEBUG)
-    #         except RuntimeError as ex:
-    #             logger.log('An error occured while unloading "' + str(Views.last_action) + '":\n' + str(ex), "QiChat", logger.ERROR)
-    #             local_manager.send_view_result(Views.last_action, {'id': Views.action_class_map[Views.last_action].action_id, 'error': "500"})
-    #         Views.last_action = None
