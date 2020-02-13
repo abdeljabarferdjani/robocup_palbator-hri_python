@@ -41,16 +41,19 @@ restart=0
 print("index global",index)
   
 class HRIManager:
-  # def load_scenario_json(json):
-  #   name_scenario = json['scenario']
-  #   print('nom du scenario',name_scenario)
-  #   path_scenario_json = '/Users/abdeljabarferdjani/Documents/Robocup/Flask/templates/public/json/receptionist/scenario.json'
+  # def load_scenario_json(self,json):
+  #   name_scenario_unicode = json['scenario']
+  #   name_scenario = str(name_scenario_unicode)
+  #   print(name_scenario,type(name_scenario))
+  #   path_scenario_json = '/Users/abdeljabarferdjani/Documents/Robocup/robocup_palbator-hri_python/templates/public/json/' +name_scenario+'/scenario.json'
+  #   print(type(path_scenario_json))
   #   print('nom du path',path_scenario_json)
   #   with open(path_scenario_json) as scenar:
-  #     # print(scenar)
-  #     chargedScenario = json.load(scenar) ## essayer avec loads
-  #     print(chargedScenario)
-  #   # return chargedScenario
+  #     print(scenar)
+      # chargedScenario = json.load(scenar) ## essayer avec loads
+      # print(chargedScenario)
+    # return chargedScenario
+
   def __init__(self):
     pass  
   ##########
@@ -105,6 +108,7 @@ class HRIManager:
         ############# STEP COMPLETED PUSH FOR RECEPTIONIST, on check si on arrive a la fin de l etape et on envoie
         ############# au REACT l index de l etape finie
         if currentStep['action'] == '' and currentStep['order'] != 0:
+          print('on rentre dans step completed')
           stepCompletedJson = {"idSteps": indexStepCompleted}
           socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
           indexStepCompleted = currentStep['order']
@@ -114,7 +118,7 @@ class HRIManager:
           lastStep=currentStep
         socketIO.wait(seconds=0.1)
         currentStep = json['data'][index]
-    self.restart_hri()
+    self.restart_hri({""})
   
   def updateNextStep(self,indexForNextStep):
     global index
@@ -136,7 +140,7 @@ class HRIManager:
   def chargeScenario(self,json):
       global dataJson
       ####
-      # dataJson = load_scenario_json(json)
+      # dataJson = self.load_scenario_json(json)
       # print(dataJson)
       ####
       choices = {receptionist['name']: receptionist, takeOutGarbage['name']: takeOutGarbage, inspection['name']: inspection, presentSchool['name']: presentSchool, creation['name']: creation}
@@ -162,7 +166,7 @@ class HRIManager:
   ###########################
 
 
-  def restart_hri(self):
+  def restart_hri(self,json):
     global finalStep
     finalStep = None
     global currentStep
@@ -190,5 +194,7 @@ socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)
 socketIO.on('scenarioCharged', hri.updateCurrentStep)
 socketIO.on('NextStep', hri.updateNextStep)
 socketIO.on('dataReceivedJS', hri.dataJSstepDone)
+socketIO.on('resetHRI', hri.restart_hri)
+
 socketIO.wait(seconds=100)
 

@@ -64,5 +64,5 @@ class Views:
         else:
           print('no action found')
           print(step_name)
-          HRIManager.restart_hri()
+          HRIManager.restart_hri({""})
 
