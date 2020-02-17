@@ -6,7 +6,7 @@ from flask_socketio import SocketIO, send, emit
 from templates import app
 from flask import jsonify
 import json
-import rospy
+
 
 app.config['SECRET_KEY'] = 'secret!'
 app.config['CORS_HEADERS'] = "Content-Type"
@@ -30,6 +30,7 @@ def handle_my_custom_event(json):
 @socketio.on('scenarioToCharged')
 @cross_origin()
 def handle_my_custom_event(json):
+    print("SCENARIO TO CHARGE")
     socketio.emit('currentScenario',json)
     
 
@@ -85,7 +86,6 @@ def handle_my_custom_event(json):
 # from views import Views
 
 if __name__ == '__main__':
-    rospy.init_node("multiplexer_node",anonymous=True)
-    app.config.from_object('configurations.DevelopmentConfig')
-    socketio.run(app)
+ app.config.from_object('configurations.DevelopmentConfig')
+ socketio.run(app)
 
