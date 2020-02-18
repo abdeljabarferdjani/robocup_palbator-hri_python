@@ -1,0 +1,17 @@
+<launch>
+
+    <node
+        name="HRIManager"
+        pkg="HriManager"
+        type="HRIManager.py"
+        output="screen"
+        >
+    </node>
+
+    <node
+	name="multiplexer"
+	pkg="HriManager"
+	type="multiplexer.py"
+	output="screen" />
+
+</launch>
