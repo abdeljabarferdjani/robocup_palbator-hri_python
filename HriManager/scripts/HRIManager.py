@@ -158,7 +158,7 @@ class HRIManager:
       # dataJson = self.load_scenario_json(json)
       # print(dataJson)
       ####
-      global socketIO
+      # global socketIO
       choices = {self.receptionist['name']: self.receptionist, self.takeOutGarbage['name']: self.takeOutGarbage, self.inspection['name']: self.inspection, self.presentSchool['name']: self.presentSchool, self.creation['name']: self.creation}
       dataJson = choices.get(json['scenario'], 'default')
       dataJsonToSendScenario = {
@@ -210,7 +210,7 @@ class HRIManager:
 if __name__ == '__main__':
   
   socketIO = SocketIO('http://127.0.0.1', 5000, LoggingNamespace)
-  from views import Views
+  from python_depend.views import Views
 
   hri = HRIManager()
   socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)

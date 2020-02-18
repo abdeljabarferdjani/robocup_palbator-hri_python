@@ -7,6 +7,7 @@ from templates import app
 from flask import jsonify
 import json
 import rospy
+from python_depend.configurations import DevelopmentConfig
 
 app.config['SECRET_KEY'] = 'secret!'
 app.config['CORS_HEADERS'] = "Content-Type"
@@ -86,6 +87,7 @@ def handle_my_custom_event(json):
 
 if __name__ == '__main__':
     rospy.init_node("multiplexer_node",anonymous=True)
-    app.config.from_object('configurations.DevelopmentConfig')
+    # app.config.from_object('configurations.DevelopmentConfig')
+    app.config.from_object(DevelopmentConfig)
     socketio.run(app)
 

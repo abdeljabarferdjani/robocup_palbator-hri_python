@@ -13,13 +13,13 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 global stepCompletedJson
 
-with open(dir_path+'/templates/public/json/drinks.json') as d:
+with open(dir_path+'/../templates/public/json/drinks.json') as d:
     drink = json.load(d)
 
-with open(dir_path+'/templates/public/json/people.json') as p:
+with open(dir_path+'/../templates/public/json/people.json') as p:
     people = json.load(p)
 
-with open(dir_path+'/templates/public/json/speciality.json') as spe:
+with open(dir_path+'/../templates/public/json/speciality.json') as spe:
     speciality = json.load(spe)
   
 class AskSomething:

@@ -10,7 +10,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 global stepCompletedJson
 
-with open(dir_path+'/templates/public/json/speciality.json') as spe:
+with open(dir_path+'/../templates/public/json/speciality.json') as spe:
     speciality = json.load(spe)
 
 class AskSpeciality:
