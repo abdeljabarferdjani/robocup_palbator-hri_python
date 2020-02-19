@@ -40,7 +40,8 @@ class AskSomething:
                         'textToShow': text,
                         'drinks' : drinks
                     },
-                    "step":arguments
+                    "step":arguments,
+                "index":index
             }
 
         if js_view_key == 'askName':
@@ -53,7 +54,8 @@ class AskSomething:
                         'textToShow': text,
                         'names' : names
                     },
-                    "step":arguments
+                    "step":arguments,
+                "index":index
             }
 
         if js_view_key == 'askSpeciality':
@@ -66,7 +68,8 @@ class AskSomething:
                         'textToShow': text,
                         'names' : name
                     },
-                    "step":arguments
+                    "step":arguments,
+                "index":index
             }
 
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)

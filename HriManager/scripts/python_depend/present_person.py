@@ -32,7 +32,8 @@ class PresentPerson:
                         'who': who
                 }
             },
-                "step":arguments ## For putOneStep
+                "step":arguments,
+                "index":index
         }
         # dataJsonToSendCurrentStep = {
         #         "index": index

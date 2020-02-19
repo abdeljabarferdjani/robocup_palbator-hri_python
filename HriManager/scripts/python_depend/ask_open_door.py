@@ -22,7 +22,8 @@ class AskOpenDoor:
                         'description': [desc]
                     }
                 },
-                "step":arguments ## For putOneStep
+                "step":arguments,
+                "index":index
         }
 
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)

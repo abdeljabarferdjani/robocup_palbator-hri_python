@@ -40,7 +40,8 @@ class AskName:
                     'textToShow': text,
                     'names' : names
                 },
-                "step":arguments ## For putOneStep
+                "step":arguments,
+                "index":index
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)

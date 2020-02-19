@@ -55,7 +55,6 @@ class Views:
                 Views.last_action = step_name
                 js_view_key = step_name
                 if( step_name == 'askDrink' or step_name == 'askSpeciality' or step_name == 'askName'):
-                    print('ask somethiiiiiing', step_name)
                     step_name = 'askSomething'
                 if( step_name == 'displayInfo' or step_name == 'askOpenDoor'):
                     step_name = 'displayInfo'

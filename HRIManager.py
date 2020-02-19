@@ -39,7 +39,7 @@ indexStepCompleted=0
 dataToUse=''
 indexFailure=None
 restart=0
-print("index global",index)
+# print("index global",index)
   
 class HRIManager:
   # def load_scenario_json(self,json):
@@ -72,6 +72,7 @@ class HRIManager:
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       indexFailure = step['indexFailure']
     if step['action'] != '':
+      print(json)
       Views.start(self,step['action'],step, index, dataToUse)
     else:
       dataJsonToSendCurrentStep = {

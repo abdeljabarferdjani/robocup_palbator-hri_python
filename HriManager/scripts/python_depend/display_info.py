@@ -29,7 +29,8 @@ class DisplayInfo:
                         'description': [desc]
                     }
                 },
-                "step":arguments
+                "step":arguments,
+                "index":index
         }
 
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)

@@ -40,7 +40,8 @@ class ShowVideo:
                     # 'video': arg_fetcher.get_argument(args, 'video')
                     'video': videos
                 },
-                "step":arguments ## For putOneStep
+                "step":arguments,
+                "index":index
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)

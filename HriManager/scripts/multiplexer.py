@@ -61,6 +61,12 @@ def handle_my_custom_event(json):
 
 #### FROM REACT to HRIM #### STEP 8 On recoit depuis le REACT les donnes que l utilisateur a entre
 #### ou un status 200 et on envoie au HRIM
+
+@socketio.on('indexOfDataReceived')
+@cross_origin()
+def handle_my_custom_event(json):
+    emit('indexDataReceivedJS',json,broadcast=True)
+
 @socketio.on('dataReceived')
 @cross_origin()
 def handle_my_custom_event(json):

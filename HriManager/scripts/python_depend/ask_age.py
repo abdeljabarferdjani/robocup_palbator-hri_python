@@ -34,7 +34,8 @@ class AskAge:
                 "data": {
                     'textToShow': text
                 },
-                "step":arguments ## For putOneStep
+                "step":arguments,
+                "index":index
         }
         socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 

@@ -5,6 +5,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 import json
 
 from std_msgs.msg import String
+
 import rospy
 import os 
 
@@ -26,7 +27,7 @@ class HRIManager:
   def __init__(self):
     rospy.init_node("hri_manager_node",anonymous=True)
     self.pub_result=rospy.Publisher("result",String,queue_size=10)
-    self.subscriber=rospy.Subscriber("test",String,self.handle_sub)
+    self.subscriber=rospy.Subscriber("SendData",String,self.handle_data)
 
 
     
@@ -62,6 +63,8 @@ class HRIManager:
     self.dataToUse=''
     self.indexFailure=None
     self.restart=0
+    self.data_received=False
+    self.currentIndexDataReceivedJS=0
     print("index global",self.index)
 
 
@@ -95,11 +98,46 @@ class HRIManager:
         socketIO.emit('startTimer',dataJsonToSendTimer, broadcast=True)
       self.updateNextStep(index)
 
+##################################### DATA RECEIVED #################################################
   
-  def handle_sub(self,req):
-    rospy.loginfo(req.data)
-    self.pub_result.publish("salut")
+  def handle_data(self,req):
+    data=req.data
+    json_received=json.loads(data)
+    rospy.loginfo(json_received['dataToUse'])
+    rospy.loginfo(json_received['index'])
+    rospy.loginfo(self.index)
+    if (self.data_received is False and self.index == json_received['index']):
+      self.data_received=True
+      if(self.currentAction != 'confirm'):
+        self.dataToUse = json_received['dataToUse']
+      if(json_received['dataToUse'] != 'false'):
+        self.updateNextStep(self.index)
+      else:
+        self.updatePreviousStep(self.index)
+      self.data_received=False
 
+  ######### On recoit les donnees que l utilisateur a entre et on appelle la fonction updateNextStep
+  ######### La fonction updateNextStep change l index sur lequel currentStep est et met donc a jour le currentStep
+
+  def indexDataJSstepDone(self,json):
+    # global index
+    # print(index,'index dans indexDataJSstepDone')
+    # print('donne dans indexDataJSstepDone',json['data'])
+    if('data' in json):
+      self.currentIndexDataReceivedJS = json['data']
+
+
+  def dataJSstepDone(self,json):
+    if (self.data_received is False and self.index == self.currentIndexDataReceivedJS):
+      self.data_received=True
+      if(self.currentAction != 'confirm'):
+        self.dataToUse = json['data']
+      if(json['data'] != 'false'):
+        self.updateNextStep(self.index)
+      else:
+        self.updatePreviousStep(self.index)
+      self.data_received=False
+  ###########################
 
 
   ####### On a en parametre, un json provenant du REACT qui contient la liste des steps ordonnees ainsi que le nom du scenario #########
@@ -123,7 +161,6 @@ class HRIManager:
         ############# STEP COMPLETED PUSH FOR RECEPTIONIST, on check si on arrive a la fin de l etape et on envoie
         ############# au REACT l index de l etape finie
         if self.currentStep['action'] == '' and self.currentStep['order'] != 0:
-          print('on rentre dans step completed')
           stepCompletedJson = {"idSteps": self.indexStepCompleted}
           socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
           self.indexStepCompleted = self.currentStep['order']
@@ -167,19 +204,7 @@ class HRIManager:
       }
       socketIO.emit('scenarioToCharged',dataJsonToSendScenario, broadcast=True)
 
-  ######### On recoit les donnees que l utilisateur a entre et on appelle la fonction updateNextStep
-  ######### La fonction updateNextStep change l index sur lequel currentStep est et met donc a jour le currentStep
-  def dataJSstepDone(self,json):
-    # global index
-    # global dataToUse
-    # global currentAction
-    if(self.currentAction != 'confirm'):
-      self.dataToUse = json['data']
-    if(json['data'] != 'false'):
-      self.updateNextStep(self.index)
-    else:
-      self.updatePreviousStep(self.index)
-  ###########################
+
 
 
   def restart_hri(self,json):
@@ -216,12 +241,10 @@ if __name__ == '__main__':
   socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)
   socketIO.on('scenarioCharged', hri.updateCurrentStep)
   socketIO.on('NextStep', hri.updateNextStep)
+  socketIO.on('indexDataReceivedJS', hri.indexDataJSstepDone)
   socketIO.on('dataReceivedJS', hri.dataJSstepDone)
   socketIO.on('resetHRI', hri.restart_hri)
 
   while not rospy.is_shutdown():
     socketIO.wait(seconds=1)
-
-
-# socketIO.wait(seconds=100)
 
