@@ -1,0 +1,9 @@
+#JSGF V1.0;
+
+grammar asr;
+
+public <rule> = <polite> [<name>] | <action> <object>;
+<polite> = HELLO | HI;
+<name> = PALBATOR | PEPPER;
+<action> = LAUNCH | EXECUTE | STOP;
+<object> = PROGRAM | SCENARIO;

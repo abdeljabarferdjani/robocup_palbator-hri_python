@@ -1,0 +1,60 @@
+Language model created by QuickLM on Mon Feb 10 07:42:15 EST 2020
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 5 sentences and 12 words
+
+\data\
+ngram 1=12
+ngram 2=15
+ngram 3=10
+
+\1-grams:
+-0.9031 </s> -0.3010
+-0.9031 <s> -0.2430
+-1.6021 EMERGENCY -0.2900
+-1.6021 EXECUTE -0.2900
+-1.6021 HELLO -0.2900
+-1.6021 HI -0.2900
+-1.6021 LAUNCH -0.2900
+-1.6021 PALBATOR -0.2430
+-1.6021 PEPPER -0.2430
+-1.6021 PROGRAM -0.2430
+-1.6021 SCENARIO -0.2430
+-1.6021 STOP -0.2430
+
+\2-grams:
+-1.0000 <s> EMERGENCY 0.0000
+-1.0000 <s> EXECUTE 0.0000
+-1.0000 <s> HELLO 0.0000
+-1.0000 <s> HI 0.0000
+-1.0000 <s> LAUNCH 0.0000
+-0.3010 EMERGENCY STOP 0.0000
+-0.3010 EXECUTE SCENARIO 0.0000
+-0.3010 HELLO PALBATOR 0.0000
+-0.3010 HI PEPPER 0.0000
+-0.3010 LAUNCH PROGRAM 0.0000
+-0.3010 PALBATOR </s> -0.3010
+-0.3010 PEPPER </s> -0.3010
+-0.3010 PROGRAM </s> -0.3010
+-0.3010 SCENARIO </s> -0.3010
+-0.3010 STOP </s> -0.3010
+
+\3-grams:
+-0.3010 <s> EMERGENCY STOP
+-0.3010 <s> EXECUTE SCENARIO
+-0.3010 <s> HELLO PALBATOR
+-0.3010 <s> HI PEPPER
+-0.3010 <s> LAUNCH PROGRAM
+-0.3010 EMERGENCY STOP </s>
+-0.3010 EXECUTE SCENARIO </s>
+-0.3010 HELLO PALBATOR </s>
+-0.3010 HI PEPPER </s>
+-0.3010 LAUNCH PROGRAM </s>
+
+\end\

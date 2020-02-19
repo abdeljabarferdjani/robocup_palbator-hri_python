@@ -1,0 +1,53 @@
+Language model created by QuickLM on Wed Feb 12 02:39:48 EST 2020
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 4 sentences and 10 words
+
+\data\
+ngram 1=10
+ngram 2=12
+ngram 3=8
+
+\1-grams:
+-0.9031 </s> -0.3010
+-0.9031 <s> -0.2430
+-1.5051 BONJOUR -0.2872
+-1.5051 LA -0.2872
+-1.5051 OUVRE -0.2872
+-1.5051 PALBATOR -0.2430
+-1.5051 PEPPER -0.2430
+-1.5051 PORTE -0.2430
+-1.5051 SALUT -0.2872
+-1.5051 STOP -0.2430
+
+\2-grams:
+-0.9031 <s> BONJOUR 0.0000
+-0.9031 <s> OUVRE 0.0000
+-0.9031 <s> SALUT 0.0000
+-0.9031 <s> STOP 0.0000
+-0.3010 BONJOUR PEPPER 0.0000
+-0.3010 LA PORTE 0.0000
+-0.3010 OUVRE LA 0.0000
+-0.3010 PALBATOR </s> -0.3010
+-0.3010 PEPPER </s> -0.3010
+-0.3010 PORTE </s> -0.3010
+-0.3010 SALUT PALBATOR 0.0000
+-0.3010 STOP </s> -0.3010
+
+\3-grams:
+-0.3010 <s> BONJOUR PEPPER
+-0.3010 <s> OUVRE LA
+-0.3010 <s> SALUT PALBATOR
+-0.3010 <s> STOP </s>
+-0.3010 BONJOUR PEPPER </s>
+-0.3010 LA PORTE </s>
+-0.3010 OUVRE LA PORTE
+-0.3010 SALUT PALBATOR </s>
+
+\end\

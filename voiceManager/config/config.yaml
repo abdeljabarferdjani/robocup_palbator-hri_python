@@ -1,0 +1,52 @@
+#Config file for pocketsphinx
+
+#Paths for asr_test.py
+#dict: "/home/student/Bureau/workspace_test_speech2/src/own_speech_recognition/misc/custom_thomas/dict_custom_v0.dic"
+#dict: "/home/student/Bureau/workspace_test_speech2/src/pocketsphinx/misc/dict_fr.dic"
+
+#lm: "/home/student/Bureau/workspace_test_speech2/src/own_speech_recognition/misc/custom_thomas/lm_custom_v0.lm"
+#lm: ":default"
+#lm: "/home/student/Bureau/workspace_test_speech2/src/pocketsphinx/misc/lm_french.lm"
+
+# TO USE GRAMMAR MODE, PLEASE SET A PATH TO A DIRECTORY WHERE YOU HAVE FSG AND GRAM FILES
+gram: "gram"
+#"/home/student/Bureau/workspace_test_speech2/src/pocketsphinx/misc/asr_thomas"
+#"/home/student/Bureau/workspace_test_speech2/src/pocketsphinx/misc/asr_thomas.gram"
+
+
+hmm: "/usr/local/share/pocketsphinx/model/en-us/en-us/"
+#hmm: "/usr/local/share/pocketsphinx/model/fr_FR/french_f0/"
+
+grammar: "asr"
+#"asr"
+
+rule: ":default"
+#rule: "rule"
+
+#Input WAV file path for send_audio.py
+input: ":default"
+
+#database_words: "/home/student/Bureau/workspace_test_speech2/src/own_speech_recognition/misc/custom_thomas/database_v0.txt"
+
+
+dict: {
+    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_names.dic",
+    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_age.dic",
+    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_drinks.dic",
+    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_confirmation.dic",
+}
+
+
+lm: {
+    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_names.lm",
+    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_age.lm",
+    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_drinks.lm",
+    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_confirmation.lm",
+}
+
+database: {
+    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_names.txt",
+    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_age.txt",
+    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_boisson.txt",
+    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_confirmation.txt",
+}

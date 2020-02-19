@@ -1,0 +1,43 @@
+<launch>
+    
+    <!--
+    Args with no default attribute are not optional
+    -->
+    <arg name="input" default=":default"/>
+    <arg name="hmm" default=":default" />
+    <arg name="dict" />
+    <arg name="kws" default=":default"/>
+    <arg name="keyphrase" default=":default"/>
+    <arg name="threshold" default=":default"/>
+    <!-- <arg name="lm" default=":default"/> -->
+
+    <!--
+    Node for publishing audio inputs
+    -->
+    <node
+        name="audio_control"
+        pkg="voiceManager"
+        type="send_audio.py"
+        output="screen"
+        >
+        <param name="input" value="$(arg input)"/>
+    </node>
+
+    <!--
+    Node for handling kws mode
+    -->
+    <node
+        name="kws_control"
+        pkg="voiceManager"
+        type="kws_test.py"
+        output="screen"
+        >
+        <param name="hmm" value="$(arg hmm)"/>
+        <param name="dict" value="$(arg dict)"/>
+        <param name="kws" value="$(arg kws)"/>
+        <param name="keyphrase" value="$(arg keyphrase)"/>
+        <param name="threshold" value="$(arg threshold)"/>
+	<!-- <param name="lm" value="$(arg lm)"/> -->
+
+    </node>
+</launch>

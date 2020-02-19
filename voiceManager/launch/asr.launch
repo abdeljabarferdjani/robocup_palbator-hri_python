@@ -1,0 +1,41 @@
+<launch>
+
+
+    <!--
+    Args with no default attribute are not optional
+    -->
+    <arg name="config" default="$(find voiceManager)/config/config.yaml" doc="Path to parameter config file"/>
+    
+    <!--
+    Node for handling jsgf grammar mode
+    -->
+	<node
+		name="asr_control"
+		pkg="voiceManager"
+		type="asr_test.py"
+        output="screen"
+        >
+	<rosparam file="$(arg config)"/>
+        <remap from="jsgf_audio" to="sphinx_audio" />
+	</node>
+
+    <!--
+    Node for publishing audio inputs
+    -->
+    <node
+        name="audio_control"
+        pkg="voiceManager"
+        type="send_audio.py"
+        output="screen"
+        >
+	<rosparam file="$(arg config)"/>
+    </node>
+
+    <!-- 
+    Node for executing voice commands -->
+    <node
+	name="voice_generator"
+	pkg="voiceManager"
+	type="test_voice.py"
+	output="screen" />
+</launch>
