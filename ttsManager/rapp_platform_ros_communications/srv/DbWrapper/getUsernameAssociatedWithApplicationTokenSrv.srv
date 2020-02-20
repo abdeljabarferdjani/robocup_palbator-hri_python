@@ -1,0 +1,6 @@
+string application_token
+---
+string username
+bool success
+string error
+string[] trace

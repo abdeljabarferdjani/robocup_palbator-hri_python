@@ -1,0 +1,7 @@
+string username
+string store_token
+string application_token
+---
+bool success
+string error
+string[] trace

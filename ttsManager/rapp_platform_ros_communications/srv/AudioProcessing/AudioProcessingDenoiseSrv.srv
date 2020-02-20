@@ -1,0 +1,8 @@
+string audio_file
+string denoised_audio_file
+string audio_type
+string user
+float32 scale
+---
+string success
+string error

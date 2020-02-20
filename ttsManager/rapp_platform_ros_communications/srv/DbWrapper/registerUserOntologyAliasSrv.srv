@@ -1,0 +1,6 @@
+string username
+string ontology_alias
+---
+bool success
+string error
+string[] trace

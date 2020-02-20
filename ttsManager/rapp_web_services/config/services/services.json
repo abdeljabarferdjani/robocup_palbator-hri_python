@@ -1,0 +1,293 @@
+{
+  "hazard_detection_door_check" : {
+    "launch": true,
+    "anonymous": false,
+    "name": "hazard_detection_door_check",
+    "url_name": "hazard_detection_door_check",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "hazard_detection_light_check" : {
+    "launch": true,
+    "anonymous": false,
+    "name": "hazard_detection_light_check",
+    "url_name": "hazard_detection_light_check",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "face_detection": {
+    "launch": true,
+    "anonymous": false,
+    "name": "face_detection",
+    "url_name": "face_detection",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "available_services": {
+    "path": "available_services/svc.js",
+    "launch": true,
+    "anonymous": false,
+    "name": "available_services",
+    "url_name": "available_services",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  },
+  "qr_detection": {
+    "launch": true,
+    "anonymous": false,
+    "name": "qr_detection",
+    "url_name": "qr_detection",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "cognitive_get_history": {
+    "launch": true,
+    "anonymous": false,
+    "name": "cognitive_get_history",
+    "url_name": "cognitive_get_history",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "cognitive_get_scores": {
+    "launch": true,
+    "anonymous": false,
+    "name": "cognitive_get_scores",
+    "url_name": "cognitive_get_scores",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "cognitive_test_chooser": {
+    "launch": true,
+    "anonymous": false,
+    "name": "cognitive_test_chooser",
+    "url_name": "cognitive_test_chooser",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "cognitive_record_performance": {
+    "launch": true,
+    "anonymous": false,
+    "name": "cognitive_record_performance",
+    "url_name": "cognitive_record_performance",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "email_send": {
+    "launch": true,
+    "anonymous": false,
+    "name": "email_send",
+    "url_name": "email_send",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "email_fetch": {
+    "launch": true,
+    "anonymous": false,
+    "name": "email_fetch",
+    "url_name": "email_fetch",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "ontology_subclasses_of": {
+    "launch": true,
+    "anonymous": false,
+    "name": "ontology_subclasses_of",
+    "url_name": "ontology_subclasses_of",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "ontology_superclasses_of": {
+    "launch": true,
+    "anonymous": false,
+    "name": "ontology_superclasses_of",
+    "url_name": "ontology_superclasses_of",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "ontology_is_subsuperclass_of": {
+    "launch": true,
+    "anonymous": false,
+    "name": "ontology_is_subsuperclass_of",
+    "url_name": "ontology_is_subsuperclass_of",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "text_to_speech": {
+    "launch": true,
+    "anonymous": false,
+    "name": "text_to_speech",
+    "url_name": "text_to_speech",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "set_noise_profile": {
+    "launch": true,
+    "anonymous": false,
+    "name": "set_noise_profile",
+    "url_name": "set_noise_profile",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "speech_detection_google": {
+    "launch": true,
+    "anonymous": false,
+    "name": "speech_detection_google",
+    "url_name": "speech_detection_google",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "speech_detection_sphinx4": {
+    "launch": true,
+    "anonymous": false,
+    "name": "speech_detection_sphinx4",
+    "url_name": "speech_detection_sphinx4",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "news_explore": {
+    "launch": true,
+    "anonymous": false,
+    "name": "news_explore",
+    "url_name": "news_explore",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "geolocation": {
+    "launch": true,
+    "anonymous": false,
+    "name": "geolocation",
+    "url_name": "geolocation",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "weather_report_forecast": {
+    "launch": true,
+    "anonymous": false,
+    "name": "weather_report_forecast",
+    "url_name": "weather_report_forecast",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "weather_report_current": {
+    "launch": true,
+    "anonymous": false,
+    "name": "weather_report_current",
+    "url_name": "weather_report_current",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "object_recognition_caffe": {
+    "launch": true,
+    "anonymous": false,
+    "name": "object_recognition_caffe",
+    "url_name": "object_recognition_caffe",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "human_detection": {
+    "launch": true,
+    "anonymous": false,
+    "name": "human_detection",
+    "url_name": "human_detection",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": true,
+    "timeout": 45000
+  },
+  "path_planning_upload_map": {
+    "launch": true,
+    "anonymous": false,
+    "name": "path_planning_upload_map",
+    "url_name": "path_planning_upload_map",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  },
+  "path_planning_plan_path_2d": {
+    "launch": true,
+    "anonymous": false,
+    "name": "path_planning_plan_path_2d",
+    "url_name": "path_planning_plan_path_2d",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  },
+  "register_user_from_store": {
+    "launch": true,
+    "anonymous": false,
+    "name": "register_user_from_store",
+    "url_name": "register_user_from_store",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  },
+  "register_user_from_platform": {
+    "launch": true,
+    "anonymous": false,
+    "name": "register_user_from_platform",
+    "url_name": "register_user_from_platform",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  },
+  "login_user": {
+    "launch": true,
+    "anonymous": false,
+    "name": "login_user",
+    "url_name": "login_user",
+    "namespace": "",
+    "authentication": true,
+    "ros_connection": false,
+    "timeout": 45000
+  }
+}

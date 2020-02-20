@@ -1,0 +1,6 @@
+string username
+---
+bool user_exists
+bool success
+string error
+string[] trace
