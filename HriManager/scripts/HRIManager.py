@@ -2,13 +2,12 @@
 
 
 from socketIO_client import SocketIO, LoggingNamespace
-import json
+import json as js
 
 from std_msgs.msg import String
-
+from HriManager.msg import DataToSay
 import rospy
 import os 
-
   
 class HRIManager:
   # def load_scenario_json(self,json):
@@ -26,7 +25,7 @@ class HRIManager:
 
   def __init__(self):
     rospy.init_node("hri_manager_node",anonymous=True)
-    self.pub_result=rospy.Publisher("result",String,queue_size=10)
+    self.pub_current_view=rospy.Publisher("CurrentView",DataToSay,queue_size=10)
     self.subscriber=rospy.Subscriber("SendData",String,self.handle_data)
 
 
@@ -35,23 +34,23 @@ class HRIManager:
     ######### SCENARIO JSON LOAD #############
 
     with open(dir_path+'/templates/public/json/present_school_test/scenario.json') as pres_school:
-      self.presentSchool = json.load(pres_school)
+      self.presentSchool = js.load(pres_school)
       self.presentSchool['name']='present_school'
 
     with open(dir_path+'/templates/public/json/creation_test/scenario.json') as creationTest:
-        self.creation = json.load(creationTest)
+        self.creation = js.load(creationTest)
         self.creation['name']='creation_test'
 
     with open(dir_path+'/templates/public/json/inspection/scenario.json') as inspec:
-        self.inspection = json.load(inspec)
+        self.inspection = js.load(inspec)
         self.inspection['name']='inspection'
 
     with open(dir_path+'/templates/public/json/take_out_the_garbage/scenario.json') as take_garbage:
-        self.takeOutGarbage = json.load(take_garbage)
+        self.takeOutGarbage = js.load(take_garbage)
         self.takeOutGarbage['name']='take_out_the_garbage'
 
     with open(dir_path+'/templates/public/json/receptionist/scenario.json') as recep:
-        self.receptionist = json.load(recep)
+        self.receptionist = js.load(recep)
         self.receptionist['name']='receptionist'
 
 
@@ -80,11 +79,19 @@ class HRIManager:
     # print('---------- STEP DANS STEPTOSTART ------',step)
     # global indexFailure
     # global currentAction
+    rospy.loginfo(step)
     self.currentAction = step['action']
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       self.indexFailure = step['indexFailure']
     if step['action'] != '':
       Views.start(self,step['action'],step, index, dataToUse)
+      messageDataToSay=DataToSay()
+      messageDataToSay.json_in_string=js.dumps(step)
+      if not dataToUse is None:
+        messageDataToSay.data_to_use_in_string=str(dataToUse)
+      else:
+        messageDataToSay.data_to_use_in_string=''
+      self.pub_current_view.publish(messageDataToSay)
     else:
       dataJsonToSendCurrentStep = {
           "index": index,
@@ -102,11 +109,11 @@ class HRIManager:
   
   def handle_data(self,req):
     data=req.data
-    json_received=json.loads(data)
-    rospy.loginfo(json_received['dataToUse'])
-    rospy.loginfo(json_received['index'])
-    rospy.loginfo(self.index)
+    json_received=js.loads(data)
     if (self.data_received is False and self.index == json_received['index']):
+      rospy.logwarn('On prend la donnee provenant du Voice Manager')
+      rospy.logwarn('L index du HRIManager est %s',self.index)
+      rospy.logwarn('L index du Voice Manager est %s',json_received['index'])
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json_received['dataToUse']
@@ -115,6 +122,8 @@ class HRIManager:
       else:
         self.updatePreviousStep(self.index)
       self.data_received=False
+    else:
+      rospy.logwarn('Le voice Manager envoie une donnee a la mauvaise etape')
 
   ######### On recoit les donnees que l utilisateur a entre et on appelle la fonction updateNextStep
   ######### La fonction updateNextStep change l index sur lequel currentStep est et met donc a jour le currentStep

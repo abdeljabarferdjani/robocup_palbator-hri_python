@@ -14,7 +14,7 @@ gram: "gram"
 #"/home/student/Bureau/workspace_test_speech2/src/pocketsphinx/misc/asr_thomas.gram"
 
 
-hmm: "/usr/local/share/pocketsphinx/model/en-us/en-us/"
+hmm: "/usr/local/lib/python2.7/dist-packages/pocketsphinx/model/en-us"
 #hmm: "/usr/local/share/pocketsphinx/model/fr_FR/french_f0/"
 
 grammar: "asr"
@@ -30,23 +30,23 @@ input: ":default"
 
 
 dict: {
-    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_names.dic",
-    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_age.dic",
-    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_drinks.dic",
-    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/dic_confirmation.dic",
+    "names":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/dic_names.dic",
+    "age":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/dic_age.dic",
+    "drinks":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/dic_drinks.dic",
+    "confirmation":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/dic_confirmation.dic",
 }
 
 
 lm: {
-    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_names.lm",
-    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_age.lm",
-    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_drinks.lm",
-    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/lm_confirmation.lm",
+    "names":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/lm_names.lm",
+    "age":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/lm_age.lm",
+    "drinks":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/lm_drinks.lm",
+    "confirmation":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/lm_confirmation.lm",
 }
 
 database: {
-    "names":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_names.txt",
-    "age":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_age.txt",
-    "drinks":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_boisson.txt",
-    "confirmation":"/home/student/Bureau/workspace_crash_test/src/voiceManager/misc/custom_receptionist/corpus_confirmation.txt",
+    "names":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/corpus_names.txt",
+    "age":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/corpus_age.txt",
+    "drinks":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/corpus_boisson.txt",
+    "confirmation":"/home/student/Documents/ros_workspace_new/src/voiceManager/misc/custom_receptionist/corpus_confirmation.txt",
 }

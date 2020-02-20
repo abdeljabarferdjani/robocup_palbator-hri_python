@@ -4,7 +4,7 @@ language: "en"
 
 
 # speed upper limit = 180
-speed: 110
+speed: 150
 
 # pitch upper limit = 99
 pitch: 50 

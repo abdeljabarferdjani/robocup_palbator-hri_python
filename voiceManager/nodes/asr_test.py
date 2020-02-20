@@ -12,6 +12,11 @@ from voiceManager.srv import SendVocalCommand
 import json
 from rapp_platform_ros_communications.srv import TextToSpeechSrv
 from std_msgs.msg import Header
+from HriManager.msg import DataToSay
+import actionlib
+
+import rapp_platform_ros_communications.msg
+
 
 class ASRModule(object):
     """Class to add jsgf grammar functionality."""
@@ -22,8 +27,8 @@ class ASRModule(object):
         
         # initialize node
         rospy.init_node("asr_control")
-        self.sub_mode_dictionary=rospy.Subscriber("CurrentView",String,self.handle_change_view)
-        self.pub=rospy.Publisher("output_JSON",String,queue_size=10)
+        self.sub_mode_dictionary=rospy.Subscriber("CurrentView",DataToSay,self.handle_change_view)
+        self.pub=rospy.Publisher("SendData",String,queue_size=10)
 
         self.dictionary_choose=None
         self.current_view_id=None
@@ -31,6 +36,9 @@ class ASRModule(object):
         self.enable_publish_detection_output=None
         # Call custom function on node shutdown
         rospy.on_shutdown(self.shutdown)
+        
+        self.client_action_tts=actionlib.SimpleActionClient("action_TTS",rapp_platform_ros_communications.msg.SayVocalSpeechAction)
+        self.client_action_tts.wait_for_server()
         rospy.loginfo("Wait for current view reception ...")
         rospy.wait_for_message("CurrentView", String)
     
@@ -66,34 +74,61 @@ class ASRModule(object):
             self.pub.publish(json_str)
 
     def handle_change_view(self,req):
-        data=req.data
-        d=json.loads(data)
+        # data=req.data
+        
+        d=json.loads(req.json_in_string)
+        dataToUse=req.data_to_use_in_string
         if self.current_view_id is None or self.current_view_id != d['order']:
+            self.client_action_tts.cancel_all_goals()
             rospy.loginfo("--------")
             tts=d['speech']['said']
-            rospy.wait_for_service('vocal_command_service')
+            if tts and "{drink}" in tts:
+                tts=tts.format(drink=dataToUse)
+            elif tts and "{name}" in tts:
+                tts=tts.format(name=dataToUse)
 
 
-            proxy_vocal_service=rospy.ServiceProxy('vocal_command_service',SendVocalCommand)
-            signal_output=proxy_vocal_service(tts)
-            rospy.loginfo('vocal service finished with signal :' +str(signal_output.output_signal))
 
-            header_tts=Header()
-            proxy_tts=rospy.ServiceProxy("/rapp/rapp_text_to_speech_espeak/text_to_speech_service",TextToSpeechSrv)
-            output_tts=proxy_tts(header_tts,tts)
-            if output_tts.error =="":
-                rospy.loginfo("TTS ended without errors")
-
-            # view_id=d['order']
-            # self.current_view_id=view_id
-
-            # view_action=d['action']
-            # self.current_view_action=view_action
-            # self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            ###########################"
+            # ACTION ESPEAK"
             
-            # if self.dictionary_choose != "":
-            #     rospy.loginfo("Load new dict config ...")
-            #     self.setup_params()
+
+
+            goal=rapp_platform_ros_communications.msg.SayVocalSpeechGoal(tts)
+            self.client_action_tts.send_goal(goal)
+            self.client_action_tts.wait_for_result()
+            
+            result_action=self.client_action_tts.get_result()
+
+            
+            rospy.loginfo("Action result "+str(result_action))
+
+
+            # rospy.wait_for_service("/rapp/rapp_text_to_speech_espeak/text_to_speech_service")
+            ##############################
+            # SERVICE PYTTSX3
+            # proxy_vocal_service=rospy.ServiceProxy('vocal_command_service',SendVocalCommand)
+            # signal_output=proxy_vocal_service(tts)
+            # rospy.loginfo('vocal service finished with signal :' +str(signal_output.output_signal))
+            ##############################
+            # 
+            # SERVICE ESPEAK
+            # header_tts=Header()
+            # proxy_tts=rospy.ServiceProxy("/rapp/rapp_text_to_speech_espeak/text_to_speech_service",TextToSpeechSrv)
+            # rospy.loginfo("TTS : "+tts)
+            # output_tts=proxy_tts(header_tts,tts)
+            # if output_tts.error =="":
+            #     rospy.loginfo("TTS ended without errors")
+
+            view_id=d['order']
+            self.current_view_id=view_id
+
+            view_action=d['action']
+            self.current_view_action=view_action
+            self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            if self.dictionary_choose != "":
+            	rospy.loginfo("Load new dict config ...")
+                self.setup_params()
 
 
     def setup_params(self):
@@ -260,22 +295,14 @@ class ASRModule(object):
                         rospy.loginfo("FAKE POSITIVE")
                         self.FAKE_POSITIVE=True
                     
-                    if self.FAKE_POSITIVE==False:
-                        self.publish_detection_output(self.output)
-                    # if self.FAKE_POSITIVE==False:
-                    #     message=VocalDataType()
-                    #     message.vocal_output=self.decoder.hyp().hypstr
-                    #     message.data_type=self.dictionary_choose
-                    #     rospy.wait_for_service('vocal_command_service')
-                    #     rospy.loginfo('vocal service initialized')
-                    #     try:
-                    #         proxy_vocal_service=rospy.ServiceProxy('vocal_command_service',SendVocalCommand)
-                    #         if self.score_detection>=0.65:
-                    #             signal_output=proxy_vocal_service(message)
-                    #             rospy.loginfo('vocal service finished with signal :' +str(signal_output.output_signal))
-                    #             time.sleep(2)
-                    #     except rospy.ServiceException, e:
-                    #         print "Service call failed: %s"%e
+                    if self.FAKE_POSITIVE==False and self.score_detection>=0.70:
+                        if self.output=='NO':
+                            self.publish_detection_output('false')
+                        elif self.output=='YES':
+                            self.publish_detection_output('true')
+                        else:
+                            self.publish_detection_output(self.output)
+               
         #########################
                 self.decoder.start_utt()
 

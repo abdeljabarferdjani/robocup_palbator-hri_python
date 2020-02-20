@@ -1,0 +1,8 @@
+#goal
+string text_to_say
+---
+#result
+string errors
+---
+#feedback
+string tts_feedback

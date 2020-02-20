@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   nav_msgs
+  actionlib_msgs
 )
 
 ################################################
@@ -117,12 +118,22 @@ add_service_files(
   /ApplicationAuthentication/AddNewUserFromPlatformSrv.srv
 )
 
+
+add_action_files(
+  DIRECTORY action
+  FILES 
+  SayVocalSpeech.action
+)
+
+
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
   geometry_msgs
   nav_msgs
+  actionlib_msgs
 )
 
 ###################################
@@ -143,5 +154,6 @@ catkin_package(
     message_runtime
     std_msgs
     geometry_msgs
+    actionlib_msgs
 )
 

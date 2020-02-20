@@ -30,6 +30,10 @@ from rapp_platform_ros_communications.srv import (
 
 from rapp_exceptions import RappError
 
+import actionlib
+import rapp_platform_ros_communications.msg 
+
+
 class TextToSpeechEspeak:
 
   def __init__(self):
@@ -44,15 +48,57 @@ class TextToSpeechEspeak:
     if(not self.serv_topic):
       rospy.logerror("Text to speech espeak topic param not found")
 
-    self.serv = rospy.Service(self.serv_topic, \
-        TextToSpeechSrv, self.text_to_speech_callback)
+    # self.serv = rospy.Service(self.serv_topic, TextToSpeechSrv, self.text_to_speech_callback)
+
+  
+    self.action_tts=actionlib.SimpleActionServer("action_TTS",rapp_platform_ros_communications.msg.SayVocalSpeechAction,self.action_tts_callback,auto_start=False)
+    self.action_tts_feedback=rapp_platform_ros_communications.msg.SayVocalSpeechFeedback()
+    self.action_tts_result=rapp_platform_ros_communications.msg.SayVocalSpeechResult()
+    self.action_tts.start()
+
+
+  #the action callback
+  def action_tts_callback(self,goal):
+    
+    success=True
+    
+    self.action_tts_feedback.tts_feedback='all clear'
+
+    if self.serv_language=="en":
+      lang='mb-us1 '
+
+    speed=self.serv_speed
+    pitch=self.serv_pitch
+
+    text=goal.text_to_say
+    text = text.replace(" ", "_")
+
+    if self.action_tts.is_preempt_requested():
+      rospy.loginfo('Preempted SayVocalSpeech Action')
+      self.action_tts.set_preempted()
+      success=False
+    
+    command = 'espeak -p ' + str(pitch) + ' -s ' + str(speed) + ' -v ' + lang + text 
+
+    output = os.system(command)
+    if output != 0:
+        self.action_tts_feedback.tts_feedback="Error: Text to speech espeak malfunctioned. You have probably\
+                given wrong language settings"
+        success=False
+
+    self.action_tts.publish_feedback(self.action_tts_feedback)
+
+    if success:
+      self.action_tts_result.errors=self.action_tts_feedback.tts_feedback
+      rospy.loginfo("Action SayVocalSpeech succeeded")
+      self.action_tts.set_succeeded(self.action_tts_result)
 
   # The service callback
   def text_to_speech_callback(self, req):
 
     res = TextToSpeechSrvResponse()
     if self.serv_language=="en":
-      lang='mb-us2 '    
+      lang='mb-us1 '    
 
     # speed = 130 # upper limit = 180
     # pitch = 50 # upper limit = 99
