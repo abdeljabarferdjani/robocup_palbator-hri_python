@@ -10,7 +10,8 @@ from sphinxbase.sphinxbase import *
 from statistics import mean 
 from voiceManager.srv import SendVocalCommand
 import json
-
+from rapp_platform_ros_communications.srv import TextToSpeechSrv
+from std_msgs.msg import Header
 
 class ASRModule(object):
     """Class to add jsgf grammar functionality."""
@@ -71,20 +72,28 @@ class ASRModule(object):
             rospy.loginfo("--------")
             tts=d['speech']['said']
             rospy.wait_for_service('vocal_command_service')
+
+
             proxy_vocal_service=rospy.ServiceProxy('vocal_command_service',SendVocalCommand)
             signal_output=proxy_vocal_service(tts)
             rospy.loginfo('vocal service finished with signal :' +str(signal_output.output_signal))
 
-            view_id=d['order']
-            self.current_view_id=view_id
+            header_tts=Header()
+            proxy_tts=rospy.ServiceProxy("/rapp/rapp_text_to_speech_espeak/text_to_speech_service",TextToSpeechSrv)
+            output_tts=proxy_tts(header_tts,tts)
+            if output_tts.error =="":
+                rospy.loginfo("TTS ended without errors")
 
-            view_action=d['action']
-            self.current_view_action=view_action
-            self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            # view_id=d['order']
+            # self.current_view_id=view_id
+
+            # view_action=d['action']
+            # self.current_view_action=view_action
+            # self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
             
-            if self.dictionary_choose != "":
-                rospy.loginfo("Load new dict config ...")
-                self.setup_params()
+            # if self.dictionary_choose != "":
+            #     rospy.loginfo("Load new dict config ...")
+            #     self.setup_params()
 
 
     def setup_params(self):
