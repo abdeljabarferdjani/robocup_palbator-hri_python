@@ -83,6 +83,7 @@ class HRIManager:
   # A l interieur de la vue on envoie au FLASK la vue a lance et les attributs
   def stepToStart(self,json,index,dataToUse):
     step = json
+    # rospy.loginfo("ETAPE A DEMARRER :"+step['name'])
     # print('---------- STEP DANS STEPTOSTART ------',step)
     # global indexFailure
     # global currentAction
@@ -93,6 +94,7 @@ class HRIManager:
     if step['action'] != '':
       self.nameAction = step['name']
       Views.start(self,step['action'],step, index, dataToUse)
+      rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+step['name'] +" SUR TABLETTE")
       messageDataToSay=DataToSay()
       messageDataToSay.json_in_string=js.dumps(step)
       if not dataToUse is None:
@@ -103,7 +105,9 @@ class HRIManager:
       else:
         messageDataToSay.data_to_use_in_string=''
       self.pub_current_view.publish(messageDataToSay)
+      # rospy.loginfo("PUBLICATION DONNEES CURRENT VIEW A VOICE MANAGER : "+str(messageDataToSay))
     else:
+      rospy.loginfo("ETAPE COURANTE A DEMARRER: "+step['name'])
       dataJsonToSendCurrentStep = {
           "index": index,
           "step":step
@@ -114,6 +118,7 @@ class HRIManager:
             "state": 'TOGGLE_TIMER/ON'
         }
         socketIO.emit('startTimer',dataJsonToSendTimer, broadcast=True)
+      rospy.loginfo("ETAPE DEMARREE: "+step['name'])
       self.updateNextStep(index)
 
 ##################################### DATA RECEIVED #################################################
@@ -122,10 +127,10 @@ class HRIManager:
     data=req.data
     json_received=js.loads(data)
     if (self.data_received is False and self.index == json_received['index']):
-      rospy.logwarn('On prend la donnee provenant du Voice Manager')
-      rospy.logwarn('L index du HRIManager est %s',self.index)
-      rospy.logwarn('L index du Voice Manager est %s',json_received['index'])
-      rospy.logwarn('La donne envoyee depuis le Voice Manager est %s',json_received['dataToUse'])
+      rospy.loginfo('CHARGEMENT DONNEE DE VOICE MANAGER')
+      # rospy.loginfo('INDEX HRI MANAGER %s',self.index)
+      # rospy.loginfo('INDEX VOICE MANAGER %s',json_received['index'])
+      rospy.loginfo('DONNEE RECUE DEPUIS VOICE MANAGER %s',json_received['dataToUse'])
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json_received['dataToUse']
@@ -135,24 +140,24 @@ class HRIManager:
         self.updatePreviousStep(self.index)
       self.data_received=False
     else:
-      rospy.logwarn('Le voice Manager envoie une donnee a la mauvaise etape')
+      rospy.logwarn('Le voice Manager envoie une donnee a la mauvaise etape: '+str(json_received['index'])+' au lieu de '+str(self.index))
 
   ######### On recoit les donnees que l utilisateur a entre et on appelle la fonction updateNextStep
   ######### La fonction updateNextStep change l index sur lequel currentStep est et met donc a jour le currentStep
 
   def indexDataJSstepDone(self,json):
-    # global index
-    # print(index,'index dans indexDataJSstepDone')
-    # print('donne dans indexDataJSstepDone',json['data'])
     if('data' in json):
       self.currentIndexDataReceivedJS = json['data']
 
 
   def dataJSstepDone(self,json):
+    
     if (self.data_received is False and self.index == self.currentIndexDataReceivedJS):
+      rospy.loginfo("DONNEE RECUE DEPUIS TOUCH MANAGER")
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json['data']
+        rospy.loginfo("DONNEE TOUCH MANAGER: "+str(self.dataToUse))
         if('name' in self.nameAction):
           self.choosenName = self.dataToUse
         if('drink' in self.nameAction):
@@ -162,6 +167,7 @@ class HRIManager:
           self.ageToUse.append(self.choosenAge)
         self.updateNextStep(self.index)
       else:
+        rospy.loginfo("DONNEE TOUCH MANAGER: "+str(json['data']))
         if(json['data'] != 'false'):
           if('name' in self.nameAction):
             self.nameToUse.append(self.choosenName)
@@ -172,7 +178,10 @@ class HRIManager:
           self.updateNextStep(self.index)
         else:
           self.updatePreviousStep(self.index)
-      self.data_received=False
+    else:
+      rospy.logwarn('Le touch Manager envoie une donnee a la mauvaise etape: '+str(self.currentIndexDataReceivedJS)+' au lieu de '+str(self.index))
+
+    self.data_received=False
       # print('la liste des noms',self.nameToUse)
       # print('la liste des boissons',self.drinkToUse)
       # print('la liste des ages',self.ageToUse)
@@ -202,6 +211,7 @@ class HRIManager:
         if self.currentStep['action'] == '' and self.currentStep['order'] != 0:
           stepCompletedJson = {"idSteps": self.indexStepCompleted}
           socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
+          rospy.loginfo("ETAPE TERMINEE: "+str(self.currentStep['name']))
           self.indexStepCompleted = self.currentStep['order']
 
         if (self.currentStep != None and self.currentStep != lastStep):
@@ -242,7 +252,7 @@ class HRIManager:
         "stepsList": dataJson['steps']
       }
       socketIO.emit('scenarioToCharged',dataJsonToSendScenario, broadcast=True)
-
+      rospy.loginfo("SCENARIO CHARGE: "+str(dataJson['name']))
 
 
 
@@ -275,7 +285,7 @@ class HRIManager:
     message_to_VoiceManager.data_to_use_in_string=''
     self.pub_current_view.publish(message_to_VoiceManager)
     socketIO.emit('restartHRI',broadcast=True)
-
+    rospy.loginfo("RESTART HRI")
 
   #############
 

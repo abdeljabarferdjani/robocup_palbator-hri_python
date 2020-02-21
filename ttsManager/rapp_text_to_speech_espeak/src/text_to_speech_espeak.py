@@ -76,10 +76,10 @@ class TextToSpeechEspeak:
     text=goal.text_to_say
     text = text.replace(" ", "_")
 
-    if self.action_tts.is_preempt_requested():
-      rospy.loginfo('Preempted SayVocalSpeech Action')
-      self.action_tts.set_preempted()
-      success=False
+    # if self.action_tts.is_preempt_requested():
+    #   rospy.loginfo('Preempted SayVocalSpeech Action')
+    #   self.action_tts.set_preempted()
+    #   success=False
     
     # command = 'espeak -p ' + str(pitch) + ' -s ' + str(speed) + ' -v ' + lang + text 
 
@@ -98,6 +98,7 @@ class TextToSpeechEspeak:
         self.process.terminate()
         self.action_tts.set_preempted()
         success=False
+        break
 
 
     self.action_tts.publish_feedback(self.action_tts_feedback)
