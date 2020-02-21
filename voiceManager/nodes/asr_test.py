@@ -48,7 +48,7 @@ class ASRModule(object):
         dic_mode=""
         if view_action=="askAge":
             dic_mode="age"
-            self.enable_publish_detection_output=True
+            self.enable_publish_detection_output=False
         
         elif view_action=="askDrink":
             dic_mode="drinks"
@@ -84,22 +84,21 @@ class ASRModule(object):
             self.client_action_tts.cancel_all_goals()
             rospy.logwarn("KILLING ACTION REQUESTED")
             rospy.loginfo("--------")
-            tts=d['speech']['said']
-            if tts and "{drink}" in tts:
-                tts=tts.format(drink=dataToUse)
-            elif tts and "{name}" in tts:
-                tts=tts.format(name=dataToUse)
-
-
+            try:
+                tts=d['speech']['said']
+                if tts and "{drink}" in tts:
+                    tts=tts.format(drink=dataToUse)
+                elif tts and "{name}" in tts:
+                    tts=tts.format(name=dataToUse)
 
             ###########################"
             # ACTION ESPEAK"
 
-            goal=rapp_platform_ros_communications.msg.SayVocalSpeechGoal(tts)
-            self.client_action_tts.send_goal(goal)
-            # self.client_action_tts.wait_for_result()
-            result_action=self.client_action_tts.get_result()
-            rospy.loginfo("Action result "+str(result_action))
+                goal=rapp_platform_ros_communications.msg.SayVocalSpeechGoal(tts)
+                self.client_action_tts.send_goal(goal)
+                # self.client_action_tts.wait_for_result()
+                result_action=self.client_action_tts.get_result()
+                rospy.loginfo("Action result "+str(result_action))
 
 
             # rospy.wait_for_service("/rapp/rapp_text_to_speech_espeak/text_to_speech_service")
@@ -118,6 +117,10 @@ class ASRModule(object):
             # if output_tts.error =="":
             #     rospy.loginfo("TTS ended without errors")
 
+            except:
+                pass
+            ###################################
+            #   DECOMMENTER POUR SETUP DETECTION
             # view_id=d['order']
             # self.current_view_id=view_id
 

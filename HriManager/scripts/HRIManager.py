@@ -55,6 +55,13 @@ class HRIManager:
 
 
     self.finalStep = None
+    self.nameToUse = []
+    self.drinkToUse = []
+    self.ageToUse = []
+    self.choosenName = None
+    self.choosenDrink = None
+    self.choosenAge = None
+    self.nameAction = None
     self.currentStep = None
     self.currentAction = None
     self.index=0
@@ -64,7 +71,7 @@ class HRIManager:
     self.restart=0
     self.data_received=False
     self.currentIndexDataReceivedJS=0
-    print("index global",self.index)
+    rospy.loginfo('HRI MANAGER LAUNCHED')
 
 
       
@@ -84,11 +91,16 @@ class HRIManager:
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       self.indexFailure = step['indexFailure']
     if step['action'] != '':
+      self.nameAction = step['name']
       Views.start(self,step['action'],step, index, dataToUse)
       messageDataToSay=DataToSay()
       messageDataToSay.json_in_string=js.dumps(step)
       if not dataToUse is None:
-        messageDataToSay.data_to_use_in_string=str(dataToUse)
+        if "drink" in self.nameAction and not "Confirm" in self.nameAction:
+          rospy.loginfo("last person :"+str(self.nameToUse[-1]))
+          messageDataToSay.data_to_use_in_string=str(self.nameToUse[-1])
+        else:
+          messageDataToSay.data_to_use_in_string=str(dataToUse)
       else:
         messageDataToSay.data_to_use_in_string=''
       self.pub_current_view.publish(messageDataToSay)
@@ -142,11 +154,29 @@ class HRIManager:
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json['data']
-      if(json['data'] != 'false'):
+        if('name' in self.nameAction):
+          self.choosenName = self.dataToUse
+        if('drink' in self.nameAction):
+          self.choosenDrink = self.dataToUse
+        if('age' in self.nameAction):
+          self.choosenAge = self.dataToUse
+          self.ageToUse.append(self.choosenAge)
         self.updateNextStep(self.index)
       else:
-        self.updatePreviousStep(self.index)
+        if(json['data'] != 'false'):
+          if('name' in self.nameAction):
+            self.nameToUse.append(self.choosenName)
+          if('drink' in self.nameAction):
+            self.drinkToUse.append(self.choosenDrink)
+          # if('age' in self.nameAction):
+          #   self.ageToUse.append(self.choosenAge)
+          self.updateNextStep(self.index)
+        else:
+          self.updatePreviousStep(self.index)
       self.data_received=False
+      print('la liste des noms',self.nameToUse)
+      print('la liste des boissons',self.drinkToUse)
+      print('la liste des ages',self.ageToUse)
   ###########################
 
 
