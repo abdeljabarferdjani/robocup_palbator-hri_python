@@ -1,0 +1,114 @@
+Language model created by QuickLM on Thu Feb 13 08:26:07 EST 2020
+Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
+
+The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
+
+The code that was used to produce this language model is available in Open Source.
+Please visit http://www.speech.cs.cmu.edu/tools/ for more information
+
+The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
+This model based on a corpus of 20 sentences and 25 words
+
+\data\
+ngram 1=25
+ngram 2=43
+ngram 3=23
+
+\1-grams:
+-2.1004 7 -0.2976
+-0.7993 </s> -0.3010
+-0.7993 <s> -0.2260
+-2.1004 AMY -0.2260
+-2.1004 BILL -0.2260
+-2.1004 CLARA -0.2260
+-2.1004 COKE -0.2260
+-2.1004 DOCTOR -0.2976
+-2.1004 FANTA -0.2260
+-2.1004 ICE -0.2976
+-2.1004 JACK -0.2260
+-2.1004 JOHN -0.2260
+-2.1004 MATT -0.2260
+-2.1004 NEO -0.2260
+-2.1004 OASIS -0.2260
+-2.1004 ORANGINA -0.2260
+-2.1004 PEPPER -0.2260
+-2.1004 PEPSI -0.2260
+-2.1004 RORY -0.2260
+-2.1004 ROSE -0.2260
+-2.1004 SALLY -0.2260
+-2.1004 SCHWEPPS -0.2260
+-2.1004 SPRITE -0.2260
+-2.1004 TEA -0.2260
+-2.1004 UP -0.2260
+
+\2-grams:
+-0.3010 7 UP 0.0000
+-1.6021 <s> 7 0.0000
+-1.6021 <s> AMY 0.0000
+-1.6021 <s> BILL 0.0000
+-1.6021 <s> CLARA 0.0000
+-1.6021 <s> COKE 0.0000
+-1.6021 <s> DOCTOR 0.0000
+-1.6021 <s> FANTA 0.0000
+-1.6021 <s> ICE 0.0000
+-1.6021 <s> JACK 0.0000
+-1.6021 <s> JOHN 0.0000
+-1.6021 <s> MATT 0.0000
+-1.6021 <s> NEO 0.0000
+-1.6021 <s> OASIS 0.0000
+-1.6021 <s> ORANGINA 0.0000
+-1.6021 <s> PEPSI 0.0000
+-1.6021 <s> RORY 0.0000
+-1.6021 <s> ROSE 0.0000
+-1.6021 <s> SALLY 0.0000
+-1.6021 <s> SCHWEPPS 0.0000
+-1.6021 <s> SPRITE 0.0000
+-0.3010 AMY </s> -0.3010
+-0.3010 BILL </s> -0.3010
+-0.3010 CLARA </s> -0.3010
+-0.3010 COKE </s> -0.3010
+-0.3010 DOCTOR PEPPER 0.0000
+-0.3010 FANTA </s> -0.3010
+-0.3010 ICE TEA 0.0000
+-0.3010 JACK </s> -0.3010
+-0.3010 JOHN </s> -0.3010
+-0.3010 MATT </s> -0.3010
+-0.3010 NEO </s> -0.3010
+-0.3010 OASIS </s> -0.3010
+-0.3010 ORANGINA </s> -0.3010
+-0.3010 PEPPER </s> -0.3010
+-0.3010 PEPSI </s> -0.3010
+-0.3010 RORY </s> -0.3010
+-0.3010 ROSE </s> -0.3010
+-0.3010 SALLY </s> -0.3010
+-0.3010 SCHWEPPS </s> -0.3010
+-0.3010 SPRITE </s> -0.3010
+-0.3010 TEA </s> -0.3010
+-0.3010 UP </s> -0.3010
+
+\3-grams:
+-0.3010 7 UP </s>
+-0.3010 <s> 7 UP
+-0.3010 <s> AMY </s>
+-0.3010 <s> BILL </s>
+-0.3010 <s> CLARA </s>
+-0.3010 <s> COKE </s>
+-0.3010 <s> DOCTOR PEPPER
+-0.3010 <s> FANTA </s>
+-0.3010 <s> ICE TEA
+-0.3010 <s> JACK </s>
+-0.3010 <s> JOHN </s>
+-0.3010 <s> MATT </s>
+-0.3010 <s> NEO </s>
+-0.3010 <s> OASIS </s>
+-0.3010 <s> ORANGINA </s>
+-0.3010 <s> PEPSI </s>
+-0.3010 <s> RORY </s>
+-0.3010 <s> ROSE </s>
+-0.3010 <s> SALLY </s>
+-0.3010 <s> SCHWEPPS </s>
+-0.3010 <s> SPRITE </s>
+-0.3010 DOCTOR PEPPER </s>
+-0.3010 ICE TEA </s>
+
+\end\

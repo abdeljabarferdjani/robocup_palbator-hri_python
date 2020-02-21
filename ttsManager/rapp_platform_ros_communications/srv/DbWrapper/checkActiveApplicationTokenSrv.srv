@@ -1,0 +1,6 @@
+string application_token
+---
+bool application_token_exists
+bool success
+string error
+string[] trace

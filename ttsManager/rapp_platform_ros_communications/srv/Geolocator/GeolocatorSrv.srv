@@ -1,0 +1,13 @@
+string ip
+string geolocator
+---
+string error
+
+string city
+string country
+string countryCode
+float32 latitude
+float32 longtitude
+string regionName
+string timezone
+string zip

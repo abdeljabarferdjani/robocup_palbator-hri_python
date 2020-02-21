@@ -8,11 +8,12 @@
 	cwd="node"
         />
  
+    <!--
     <node
 	name="multiplexer"
 	pkg="HriManager"
 	type="multiplexer.py"
 	output="screen"
-	cwd="node" />
+	cwd="node" /> -->
 
 </launch>

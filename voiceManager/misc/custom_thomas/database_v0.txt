@@ -1,0 +1,20 @@
+JOHN	name
+AMY	name
+RORY	name
+ROSE	name
+JACK	name
+CLARA	name
+MATT	name
+SALLY	name
+BILL	name
+NEO	name
+COKE	boisson
+PEPSI	boisson
+FANTA	boisson
+ORANGINA	boisson
+SCHWEPPS	boisson
+ICE TEA	boisson
+SPRITE	boisson
+7 UP	boisson
+DOCTOR PEPPER	boisson
+OASIS	boisson

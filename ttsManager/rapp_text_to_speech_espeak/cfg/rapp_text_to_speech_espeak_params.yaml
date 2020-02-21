@@ -1,0 +1,13 @@
+rapp_text_to_speech_espeak_topic: /rapp/rapp_text_to_speech_espeak/text_to_speech_service
+
+language: "en"
+
+
+# speed upper limit = 180
+speed: 150
+
+# pitch upper limit = 99
+pitch: 50 
+
+
+

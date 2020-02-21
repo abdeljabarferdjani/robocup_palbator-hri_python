@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rapp_platform_launchers</name>
+  <version>0.0.1</version>
+  <description>The rapp-platform launchers</description>
+
+  <maintainer email="etsardou@iti.gr">Emmanouil Tsardoulias</maintainer>
+
+  <license>APACHE 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rapp_face_detection</depend>
+  <depend>rapp_knowrob_wrapper</depend>
+  <depend>rapp_mysql_wrapper</depend>
+  <depend>rapp_qr_detection</depend>
+  <depend>rapp_speech_detection_google</depend>
+
+  <export>
+  </export>
+</package>
