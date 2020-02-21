@@ -65,6 +65,8 @@ class ASRModule(object):
             dic_mode="confirmation"
             self.enable_publish_detection_output=True
 
+        elif view_action==None:
+            self.enable_publish_detection_output=False
         return dic_mode
 
     def publish_detection_output(self,detection_output):
@@ -80,6 +82,7 @@ class ASRModule(object):
         dataToUse=req.data_to_use_in_string
         if self.current_view_id is None or self.current_view_id != d['order']:
             self.client_action_tts.cancel_all_goals()
+            rospy.logwarn("KILLING ACTION REQUESTED")
             rospy.loginfo("--------")
             tts=d['speech']['said']
             if tts and "{drink}" in tts:
@@ -91,16 +94,11 @@ class ASRModule(object):
 
             ###########################"
             # ACTION ESPEAK"
-            
-
 
             goal=rapp_platform_ros_communications.msg.SayVocalSpeechGoal(tts)
             self.client_action_tts.send_goal(goal)
-            self.client_action_tts.wait_for_result()
-            
+            # self.client_action_tts.wait_for_result()
             result_action=self.client_action_tts.get_result()
-
-            
             rospy.loginfo("Action result "+str(result_action))
 
 
@@ -120,15 +118,15 @@ class ASRModule(object):
             # if output_tts.error =="":
             #     rospy.loginfo("TTS ended without errors")
 
-            view_id=d['order']
-            self.current_view_id=view_id
+            # view_id=d['order']
+            # self.current_view_id=view_id
 
-            view_action=d['action']
-            self.current_view_action=view_action
-            self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
-            if self.dictionary_choose != "":
-            	rospy.loginfo("Load new dict config ...")
-                self.setup_params()
+            # view_action=d['action']
+            # self.current_view_action=view_action
+            # self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            # if self.dictionary_choose != "":
+            # 	rospy.loginfo("Load new dict config ...")
+            #     self.setup_params()
 
 
     def setup_params(self):

@@ -79,7 +79,7 @@ class HRIManager:
     # print('---------- STEP DANS STEPTOSTART ------',step)
     # global indexFailure
     # global currentAction
-    rospy.loginfo(step)
+    # rospy.loginfo(step)
     self.currentAction = step['action']
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       self.indexFailure = step['indexFailure']
@@ -106,7 +106,7 @@ class HRIManager:
       self.updateNextStep(index)
 
 ##################################### DATA RECEIVED #################################################
-  
+
   def handle_data(self,req):
     data=req.data
     json_received=js.loads(data)
@@ -114,6 +114,7 @@ class HRIManager:
       rospy.logwarn('On prend la donnee provenant du Voice Manager')
       rospy.logwarn('L index du HRIManager est %s',self.index)
       rospy.logwarn('L index du Voice Manager est %s',json_received['index'])
+      rospy.logwarn('La donne envoyee depuis le Voice Manager est %s',json_received['dataToUse'])
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json_received['dataToUse']
@@ -217,6 +218,8 @@ class HRIManager:
 
 
   def restart_hri(self,json):
+
+    # rospy.logwarn("JSON RESTART :j"+str(json))
     # global finalStep
     self.finalStep = None
     # global currentStep
@@ -233,6 +236,15 @@ class HRIManager:
     self.indexFailure=None
     # global restart
     self.restart = 1
+
+    message_to_VoiceManager=DataToSay()
+    dataJsonView={
+      "order": self.index,
+      "action": self.currentAction
+    }
+    message_to_VoiceManager.json_in_string=js.dumps(dataJsonView)
+    message_to_VoiceManager.data_to_use_in_string=''
+    self.pub_current_view.publish(message_to_VoiceManager)
     socketIO.emit('restartHRI',broadcast=True)
 
 

@@ -62,6 +62,7 @@ class TextToSpeechEspeak:
   #the action callback
   def action_tts_callback(self,goal):
     
+    rospy.loginfo("Action initiating ...")
     success=True
     
     self.action_tts_feedback.tts_feedback='all clear'
