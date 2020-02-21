@@ -97,7 +97,6 @@ class HRIManager:
       messageDataToSay.json_in_string=js.dumps(step)
       if not dataToUse is None:
         if "drink" in self.nameAction and not "Confirm" in self.nameAction:
-          rospy.loginfo("last person :"+str(self.nameToUse[-1]))
           messageDataToSay.data_to_use_in_string=str(self.nameToUse[-1])
         else:
           messageDataToSay.data_to_use_in_string=str(dataToUse)
@@ -174,9 +173,9 @@ class HRIManager:
         else:
           self.updatePreviousStep(self.index)
       self.data_received=False
-      print('la liste des noms',self.nameToUse)
-      print('la liste des boissons',self.drinkToUse)
-      print('la liste des ages',self.ageToUse)
+      # print('la liste des noms',self.nameToUse)
+      # print('la liste des boissons',self.drinkToUse)
+      # print('la liste des ages',self.ageToUse)
   ###########################
 
 
@@ -291,7 +290,7 @@ if __name__ == '__main__':
   hri = HRIManager()
   socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)
   socketIO.on('scenarioCharged', hri.updateCurrentStep)
-  socketIO.on('NextStep', hri.updateNextStep)
+  # socketIO.on('NextStep', hri.updateNextStep)
   socketIO.on('indexDataReceivedJS', hri.indexDataJSstepDone)
   socketIO.on('dataReceivedJS', hri.dataJSstepDone)
   socketIO.on('resetHRI', hri.restart_hri)

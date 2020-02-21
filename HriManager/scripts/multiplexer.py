@@ -19,7 +19,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 @socketio.on('socketBridge')
 @cross_origin()
 def handle_my_custom_event(json):
-    print('received from react client socketBridge init',json)
+    print('SOCKET BRIDGE INIT')
     return("")
 
 #### FROM REACT to HRIM ####  STEP 2 Le REACT envoie au HRIM le scenario selectionne afin qu'il load le json necessaire au lancement du scenario
@@ -41,21 +41,21 @@ def handle_my_custom_event(json):
 @socketio.on('currentViewHRIM')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('scenarioCharged', json,broadcast=True)
+    socketio.emit('scenarioCharged', json,broadcast=True)
     return("")
     
 #### FROM HRIM to REACT #### STEP 5 et 6 On a une etape qui commence on envoie au REACT le currentStep
 @socketio.on('stepCurrent')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('currentStep',json,broadcast=True)
+    socketio.emit('currentStep',json,broadcast=True)
     return("")
 
 #### FROM HRIM to REACT #### STEP 5 et 6 On start le timer sur l etape courrante
 @socketio.on('startTimer')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('timerState',json,broadcast=True)
+    socketio.emit('timerState',json,broadcast=True)
     return("")
 
 #### FROM VIEW to REACT #### STEP 7 On recoit la VUE a envoyer au REACT afin 
@@ -63,7 +63,7 @@ def handle_my_custom_event(json):
 @socketio.on('currentViewToSend')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('currentView',json,broadcast=True)
+    socketio.emit('currentView',json,broadcast=True)
     return("")
 
 #### FROM REACT to HRIM #### STEP 8 On recoit depuis le REACT les donnes que l utilisateur a entre
@@ -72,25 +72,25 @@ def handle_my_custom_event(json):
 @socketio.on('indexOfDataReceived')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('indexDataReceivedJS',json,broadcast=True)
+    socketio.emit('indexDataReceivedJS',json,broadcast=True)
     return("")
 
 @socketio.on('dataReceived')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('dataReceivedJS',json,broadcast=True)
+    socketio.emit('dataReceivedJS',json,broadcast=True)
     return("")
 
 @socketio.on('restartHRI')
 @cross_origin()
 def handle_my_custom_event():
-    emit('endScenario',broadcast=True)
+    socketio.emit('endScenario',broadcast=True)
     return("")
 
 @socketio.on('askToResetHRIGM')
 @cross_origin()
 def handle_my_custom_event():
-    emit('resetHRI',broadcast=True)
+    socketio.emit('resetHRI',broadcast=True)
     return("")
 
 #### FROM HRIM to REACT #### STEP 9 On recoit depuis le HRIM l index de l etape finie et on l envoie au REACT
@@ -98,13 +98,12 @@ def handle_my_custom_event():
 @socketio.on('CompleteStep')
 @cross_origin()
 def handle_my_custom_event(json):
-    emit('stepCompleted',json,broadcast=True)
+    socketio.emit('stepCompleted',json,broadcast=True)
     return("")
 
 # from views import Views
 
 if __name__ == '__main__':
-    rospy.init_node("multiplexer_node",anonymous=True)
     # app.config.from_object('configurations.DevelopmentConfig')
     app.config.from_object(DevelopmentConfig)
     socketio.run(app)
