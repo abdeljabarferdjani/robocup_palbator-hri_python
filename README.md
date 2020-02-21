@@ -1,13 +1,14 @@
 # PALBATOR-HRI
 HRI python for Palbator, including Flask server and python client ( HRI Manager )
 
-## Dependencies for FLASK server
+## Dependencies for MULTIPLEXER (FLASK server)
 - Sudo apt-get install python3-dev python3-pip
 - Sudo pip install flask
 - Sudo pip install -U flask-cors
 - Sudo pip install flask-socketio
+- Sudo apt-get install python-eventlet
 
-## Dependencies for FLASK client
+## Dependencies for HRI MANAGER (FLASK client)
 - Sudo pip install -U socketIO-client
 
 ## Launch
