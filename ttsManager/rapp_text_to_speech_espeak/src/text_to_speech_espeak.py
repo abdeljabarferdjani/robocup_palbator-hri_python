@@ -33,6 +33,7 @@ from rapp_exceptions import RappError
 import actionlib
 import rapp_platform_ros_communications.msg 
 
+import subprocess
 
 class TextToSpeechEspeak:
 
@@ -50,6 +51,7 @@ class TextToSpeechEspeak:
 
     # self.serv = rospy.Service(self.serv_topic, TextToSpeechSrv, self.text_to_speech_callback)
 
+    self.process=None
   
     self.action_tts=actionlib.SimpleActionServer("action_TTS",rapp_platform_ros_communications.msg.SayVocalSpeechAction,self.action_tts_callback,auto_start=False)
     self.action_tts_feedback=rapp_platform_ros_communications.msg.SayVocalSpeechFeedback()
@@ -65,7 +67,7 @@ class TextToSpeechEspeak:
     self.action_tts_feedback.tts_feedback='all clear'
 
     if self.serv_language=="en":
-      lang='mb-us1 '
+      lang='mb-us1'
 
     speed=self.serv_speed
     pitch=self.serv_pitch
@@ -78,13 +80,24 @@ class TextToSpeechEspeak:
       self.action_tts.set_preempted()
       success=False
     
-    command = 'espeak -p ' + str(pitch) + ' -s ' + str(speed) + ' -v ' + lang + text 
+    # command = 'espeak -p ' + str(pitch) + ' -s ' + str(speed) + ' -v ' + lang + text 
 
-    output = os.system(command)
-    if output != 0:
-        self.action_tts_feedback.tts_feedback="Error: Text to speech espeak malfunctioned. You have probably\
-                given wrong language settings"
+    # output = os.system(command)
+    # if output != 0:
+    #     self.action_tts_feedback.tts_feedback="Error: Text to speech espeak malfunctioned. You have probably\
+    #             given wrong language settings"
+    #     success=False
+    
+    self.process=subprocess.Popen(['espeak','-p',str(pitch),'-s',str(speed),'-v',lang],stdin=subprocess.PIPE, stdout=subprocess.PIPE,close_fds=True)
+    self.process.stdin.write(text)
+    self.process.stdin.close()
+    while self.process.poll() is None:
+      if self.action_tts.is_preempt_requested():
+        rospy.loginfo('Preempted SayVocalSpeech Action')
+        self.process.terminate()
+        self.action_tts.set_preempted()
         success=False
+
 
     self.action_tts.publish_feedback(self.action_tts_feedback)
 
