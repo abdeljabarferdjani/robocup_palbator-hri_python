@@ -34,6 +34,8 @@ class ASRModule(object):
         self.current_view_id=None
         self.current_view_action=None
         self.enable_publish_detection_output=None
+        
+        self.current_directory=os.path.dirname(os.path.realpath(__file__))
         # Call custom function on node shutdown
         rospy.on_shutdown(self.shutdown)
         
@@ -210,7 +212,7 @@ class ASRModule(object):
         if rospy.has_param(_database):
             for database_mode,database_path in rospy.get_param(_database).iteritems():
                 if database_mode==self.dictionary_choose:
-                    file_database=open(database_path,"r")
+                    file_database=open(self.current_directory+"/"+database_path,"r")
                     self.database_words=[]
                     for line in file_database:
                         data=line.split("\n")[0]
