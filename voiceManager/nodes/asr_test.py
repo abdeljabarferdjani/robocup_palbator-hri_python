@@ -123,15 +123,15 @@ class ASRModule(object):
                 pass
             ###################################
             #   DECOMMENTER POUR SETUP DETECTION
-            # view_id=d['order']
-            # self.current_view_id=view_id
+            view_id=d['order']
+            self.current_view_id=view_id
 
-            # view_action=d['action']
-            # self.current_view_action=view_action
-            # self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
-            # if self.dictionary_choose != "":
-            # 	rospy.loginfo("Load new dict config ...")
-            #     self.setup_params()
+            view_action=d['action']
+            self.current_view_action=view_action
+            self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            if self.dictionary_choose != "":
+            	rospy.loginfo("Load new dict config ...")
+                self.setup_params()
 
 
     def setup_params(self):
@@ -178,7 +178,7 @@ class ASRModule(object):
                 print(dict_mode)
                 print(dict_path)
                 if dict_mode==self.dictionary_choose:
-                    self.dict=dict_path
+                    self.dict=self.current_directory+"/"+dict_path
                     rospy.loginfo("Loading "+str(dict_mode)+" dictionary file...")
                     rospy.loginfo("Dict path : "+str(dict_path))
         else:
@@ -197,7 +197,7 @@ class ASRModule(object):
             self._use_lm = 1
             for lm_mode,lm_path in rospy.get_param(_lm_param).iteritems():
                 if lm_mode==self.dictionary_choose:
-                    self.class_lm=lm_path
+                    self.class_lm=self.current_directory+"/"+lm_path
                     rospy.loginfo("Loading "+str(lm_mode)+" lm file...")
                     rospy.loginfo("LM path : "+str(lm_path))
         elif rospy.has_param(_gram) and rospy.has_param(_rule):
@@ -268,6 +268,7 @@ class ASRModule(object):
 
     def process_audio(self, data):
         """Audio processing based on decoder config."""
+        
         # Check if input audio has ended
         self.FAKE_POSITIVE=None
         self.decoder.process_raw(data.data, False, False)
@@ -285,26 +286,26 @@ class ASRModule(object):
                     rospy.loginfo('Proba : '+str(logmath.exp(self.decoder.hyp().prob)))
                     self.output=self.decoder.hyp().hypstr
        ##########################  A DECOMMENTER POUR APPELER LE SERVICE TEXT TO SPEECH
-                    test_database=[]
-                    for word in self.database_words:
-                        # WORD=word.upper()
-                        if word==self.output:
-                            test_database.append(word)
-                            break
-                    if len(test_database)>0:
-                        rospy.loginfo("DETECTED WORD IS IN THE LIST")
-                        self.FAKE_POSITIVE=False
-                    else:
-                        rospy.loginfo("FAKE POSITIVE")
-                        self.FAKE_POSITIVE=True
+                    # test_database=[]
+                    # for word in self.database_words:
+                    #     # WORD=word.upper()
+                    #     if word==self.output:
+                    #         test_database.append(word)
+                    #         break
+                    # if len(test_database)>0:
+                    #     rospy.loginfo("DETECTED WORD IS IN THE LIST")
+                    #     self.FAKE_POSITIVE=False
+                    # else:
+                    #     rospy.loginfo("FAKE POSITIVE")
+                    #     self.FAKE_POSITIVE=True
                     
-                    if self.FAKE_POSITIVE==False and self.score_detection>=0.70:
-                        if self.output=='NO':
-                            self.publish_detection_output('false')
-                        elif self.output=='YES':
-                            self.publish_detection_output('true')
-                        else:
-                            self.publish_detection_output(self.output)
+                    # if self.FAKE_POSITIVE==False and self.score_detection>=0.86:
+                    #     if self.output=='NO':
+                    #         self.publish_detection_output('false')
+                    #     elif self.output=='YES':
+                    #         self.publish_detection_output('true')
+                    #     else:
+                    #         self.publish_detection_output(self.output)
                
         #########################
                 self.decoder.start_utt()

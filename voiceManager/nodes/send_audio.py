@@ -35,6 +35,8 @@ class AudioMessage(object):
         self._input = "~input"
         _rate_bool = False
 
+        pa=pyaudio.PyAudio()
+        stream=None
         # Checking if audio file given or system microphone is needed
         if rospy.has_param(self._input):
             if rospy.get_param(self._input) != ":default":
@@ -42,10 +44,17 @@ class AudioMessage(object):
                 stream = open(rospy.get_param(self._input), 'rb')
                 rate = rospy.Rate(5) # 10hz
             else:
+                for i in range(pa.get_device_count()):
+                    dev = pa.get_device_info_by_index(i)
+                    if dev.get('name')=='USB Audio CODEC: - (hw:1,0)':
                 # Initializing pyaudio for input from system microhpone
-                stream = pyaudio.PyAudio().open(format=pyaudio.paInt16, channels=1,
-                                                rate=16000, input=True, frames_per_buffer=1024)
-                stream.start_stream()
+                        stream = pa.open(format=pyaudio.paInt16, channels=1,
+                                                        rate=16000, input=True, input_device_index=6, frames_per_buffer=1024)
+                        stream.start_stream()
+                        
+
+                if stream is None:
+                    rospy.logerr("No mic device found")
         else:
             rospy.logerr("No input means provided. Please use the launch file instead")
 
