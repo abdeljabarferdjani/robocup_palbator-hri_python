@@ -6,27 +6,55 @@ from std_msgs.msg import String
 import json
 from HriManager.msg import GmToHriAction, GmToHriGoal
 import actionlib
+import os
+import json as js
 
 class TestROS(object):
     def __init__(self):
         rospy.init_node("test",anonymous=True)
         # self.sub=rospy.Subscriber("test_JSON",String,self.handle_sub)
-        self.pub=rospy.Publisher("SendData",String,queue_size=10)
-        self.pub2=rospy.Publisher("SendData",String,queue_size=10)
+        # self.pub=rospy.Publisher("SendData",String,queue_size=10)
+        # self.pub2=rospy.Publisher("SendData",String,queue_size=10)
         self.rate=rospy.Rate(1)
-        self.sub_test=rospy.Subscriber("test",String,self.handle_test)
+        # self.sub_test=rospy.Subscriber("test",String,self.handle_test)
+        self.dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
+        self.sub_choice_scenario=rospy.Subscriber("choice_scenario",String,self.handle_choice_scenario)
+        rospy.wait_for_message("choice_scenario")
         self.client_action_GmToHri=actionlib.SimpleActionClient("action_GmToHri",GmToHriAction)
         rospy.loginfo("wait for action server")
         self.client_action_GmToHri.wait_for_server()
 
 
-        goal=GmToHriGoal("je suis une patate")
-        self.client_action_GmToHri.send_goal(goal)
-        self.client_action_GmToHri.wait_for_result()
-        result_action=self.client_action_GmToHri.get_result()
-        rospy.loginfo("ACTION RESULT: "+str(result_action))#.Gm_To_Hri_output))
+        # goal=GmToHriGoal("je suis une patate")
+        # self.client_action_GmToHri.send_goal(goal)
+        # self.client_action_GmToHri.wait_for_result()
+        # result_action=self.client_action_GmToHri.get_result()
+        # rospy.loginfo("ACTION RESULT: "+str(result_action))#.Gm_To_Hri_output))
 
+
+    def handle_choice_scenario(self,req):
+        if req.data=='present_school':
+            with open(self.dir_path+'/templates/public/json/present_school_test/scenario.json') as pres_school:
+                self.presentSchool = js.load(pres_school)
+
+        elif req.data=='creation_test':
+            with open(self.dir_path+'/templates/public/json/creation_test/scenario.json') as creationTest:
+                self.creation = js.load(creationTest)
+        
+        elif req.data=='inspection':
+            with open(self.dir_path+'/templates/public/json/inspection/scenario.json') as inspec:
+                self.inspection = js.load(inspec)
+
+        elif req.data=='take_out_the_garbage':
+            with open(self.dir_path+'/templates/public/json/take_out_the_garbage/scenario.json') as take_garbage:
+                self.takeOutGarbage = js.load(take_garbage)
+        elif req.data=='receptionist':
+            with open(self.dir_path+'/templates/public/json/receptionist/scenario.json') as recep:
+                self.receptionist = js.load(recep)
+
+        rospy.loginfo("CHOICE SCENARIO: "+req.data)
     def handle_test(self,req):
         if req.data=="go":
             self.client_action_GmToHri.cancel_all_goals()

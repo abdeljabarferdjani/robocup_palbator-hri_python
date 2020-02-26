@@ -32,7 +32,7 @@ class HRIManager:
     self.pub_current_view=rospy.Publisher("CurrentView",DataToSay,queue_size=10)
     self.subscriber=rospy.Subscriber("SendData",String,self.handle_data)
 
-
+    self.pub_choice_scenario=rospy.Publisher("choice_scenario",String,queue_size=10)
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     ######### SCENARIO JSON LOAD #############
@@ -292,6 +292,7 @@ class HRIManager:
       }
       socketIO.emit('scenarioToCharged',dataJsonToSendScenario, broadcast=True)
       rospy.loginfo("SCENARIO CHARGE: "+str(dataJson['name']))
+      self.pub_choice_scenario.publish(str(dataJson['name']))
 
 
 
