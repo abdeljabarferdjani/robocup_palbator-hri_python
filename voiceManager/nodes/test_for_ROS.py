@@ -17,7 +17,7 @@ class TestROS(object):
         message=DataToSay()
         
 
-        x={u'name': u'Wait', u'order': 3, u'eta': 0, u'speech': {u'said': u"Did you say your name was John?", u'title': u"I'm waiting for the referee"}, u'arguments': {u'time': 3}, u'action': u'askName', u'id': u'findg1_wait'}
+        x={u'name': u'Wait', u'order': 3, u'eta': 0, u'speech': {u'said': u"Did you say your name was John?", u'title': u"I'm waiting for the referee"}, u'arguments': {u'time': 3}, u'action': u'confirm', u'id': u'findg1_wait'}
         json_str=json.dumps(x)
         message.json_in_string=json_str
         message.data_to_use_in_string=''

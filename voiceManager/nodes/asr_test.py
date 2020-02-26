@@ -214,9 +214,14 @@ class ASRModule(object):
                 if database_mode==self.dictionary_choose:
                     file_database=open(self.current_directory+"/"+database_path,"r")
                     self.database_words=[]
+                    
                     for line in file_database:
                         data=line.split("\n")[0]
-                        self.database_words.append(data)
+                        data2=data.split("\t")
+                        if len(data2)>1:
+                            self.database_words.append([data2[0],float(data2[1])])
+                        else:
+                            self.database_words.append(data2[0])
                     file_database.close()
                     print(self.database_words)
 
@@ -285,12 +290,14 @@ class ASRModule(object):
                     self.score_detection=logmath.exp(self.decoder.hyp().best_score)
                     rospy.loginfo('Proba : '+str(logmath.exp(self.decoder.hyp().prob)))
                     self.output=self.decoder.hyp().hypstr
+
+
        ##########################  A DECOMMENTER POUR APPELER LE SERVICE TEXT TO SPEECH
                     # test_database=[]
                     # for word in self.database_words:
                     #     # WORD=word.upper()
-                    #     if word==self.output:
-                    #         test_database.append(word)
+                    #     if word[0]==self.output:
+                    #         test_database.append(word[0])
                     #         break
                     # if len(test_database)>0:
                     #     rospy.loginfo("DETECTED WORD IS IN THE LIST")
@@ -299,14 +306,40 @@ class ASRModule(object):
                     #     rospy.loginfo("FAKE POSITIVE")
                     #     self.FAKE_POSITIVE=True
                     
-                    # if self.FAKE_POSITIVE==False and self.score_detection>=0.86:
+                    self.FAKE_POSITIVE=True
+                    for object in self.database_words:
+                        if type(object) is list:
+                            if object[0]==self.output:
+                                self.FAKE_POSITIVE=False
+                                detection_seuil=object[1]
+                                break
+                        else:
+                            if object==self.output:
+                                self.FAKE_POSITIVE=False
+                                break
+                    
+                    # if self.FAKE_POSITIVE==False and self.score_detection>=detection_seuil:
                     #     if self.output=='NO':
                     #         self.publish_detection_output('false')
                     #     elif self.output=='YES':
                     #         self.publish_detection_output('true')
                     #     else:
                     #         self.publish_detection_output(self.output)
-               
+                    # elif self.FAKE_POSITIVE==True:
+                    #     rospy.logwarn("WORD NOT IN DICT: "+self.output)
+                    
+                    # elif self.score_detection<detection_seuil:
+                    #     rospy.logwarn("SEUIL TROP FAIBLE: "+str(round(self.score_detection,4))+" AU LIEU DE "+str(round(detection_seuil,4)))
+
+                    ####################################################################
+                    # PERMET DE STOCKER LES RESULTATS DES DETECTIONS POUR AFFINER LES SEUILS
+                    if self.FAKE_POSITIVE==False:
+                        if not os.path.exists("/home/student/Bureau/result_mic/"+self.dictionary_choose):
+                            os.makedirs("/home/student/Bureau/result_mic/"+self.dictionary_choose)
+                        file_result=open("/home/student/Bureau/result_mic/"+self.dictionary_choose+"/"+self.output+"_result.txt","a+")
+                        file_result.write(self.output+"\t"+str(self.score_detection)+"\n")
+                        file_result.close()
+                    #######################################################################
         #########################
                 self.decoder.start_utt()
 
