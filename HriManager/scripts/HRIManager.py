@@ -8,7 +8,11 @@ from std_msgs.msg import String
 from HriManager.msg import DataToSay
 import rospy
 import os 
-  
+import actionlib
+from HriManager.msg import GmToHriAction, GmToHriFeedback, GmToHriResult
+import time
+
+
 class HRIManager:
   # def load_scenario_json(self,json):
   #   name_scenario_unicode = json['scenario']
@@ -71,10 +75,45 @@ class HRIManager:
     self.restart=0
     self.data_received=False
     self.currentIndexDataReceivedJS=0
+
+    self.action_GM_TO_HRI_server=actionlib.SimpleActionServer("action_GmToHri",GmToHriAction,self.action_GmToHri_callback,auto_start=False)
+    self.action_GM_TO_HRI_feedback=GmToHriFeedback()
+    self.action_GM_TO_HRI_result=GmToHriResult()
+    self.action_GM_TO_HRI_server.start()
+
     rospy.loginfo('HRI MANAGER LAUNCHED')
 
 
-      
+  def action_GmToHri_callback(self,goal):
+    rospy.loginfo("Action initiating ...")
+
+    success=True
+    self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='All clear'
+    rospy.loginfo("GOAL RECEIVED: "+goal.json_request)
+
+    time.sleep(2)
+
+
+    ##################"
+    for i in range(0,50):
+      if self.action_GM_TO_HRI_server.is_preempt_requested():
+        rospy.loginfo("Preempted GM TO HRI Action")
+        self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='Action preempted by client'
+        self.action_GM_TO_HRI_server.set_preempted()
+        success=False
+        break
+      rospy.loginfo("HELLOOOOOOOOOOOOOOOOOO")
+      time.sleep(1)
+
+    # ##################"
+
+    self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
+    if success:
+      self.action_GM_TO_HRI_result.Gm_To_Hri_output=self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback
+      rospy.loginfo("Action GM TO HRI succeeded")
+      self.action_GM_TO_HRI_server.set_succeeded(self.action_GM_TO_HRI_result)
+
+
   ##########
   # On a le current step en json et son index afin de start la vue approprie
   # Si le step n a pas d action, c est que c est le titre d une etape.
