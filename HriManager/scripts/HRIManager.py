@@ -97,6 +97,7 @@ class HRIManager:
     if json_goal['whatToDo']=="Load scenario":
       self.scenario_loaded=False
       rospy.loginfo("LOADING SCENARIO...")
+      rospy.loginfo("HRI : JSON GOAL "+str(json_goal))
       self.chargeScenario(json_goal)
       while self.scenario_loaded==False and not rospy.is_shutdown():
         # rospy.loginfo("scenario loading")
@@ -317,7 +318,7 @@ class HRIManager:
 
 
   def scenarioCharged(self,json):
-    # rospy.loginfo("JSON FOR GM "+str(json))
+    rospy.loginfo("HRI : SCENARIO CHARGED")
     self.json_for_GM=json
     self.scenario_loaded=True
 

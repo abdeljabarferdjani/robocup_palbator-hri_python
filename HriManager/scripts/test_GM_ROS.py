@@ -1,4 +1,5 @@
 #!/usr/bin/python
+__authors__='Thomas Curé, Abdeljabar Ferdjani'
 
 import rospy
 from std_msgs.msg import String
@@ -22,7 +23,7 @@ class TestROS(object):
         self.scenario_index=None
         self.scenario_current_view=None
 
-        self.sub_request_hri_restart=rospy.Subscriber("HRI_restart_request",String,self.handle_restart_request)
+        # self.sub_request_hri_restart=rospy.Subscriber("HRI_restart_request",String,self.handle_restart_request)
         
         self.client_action_GmToHri=actionlib.SimpleActionClient("action_GmToHri",GmToHriAction)
         rospy.loginfo("wait for action server")
