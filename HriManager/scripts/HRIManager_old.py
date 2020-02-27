@@ -32,12 +32,10 @@ class HRIManager:
     self.pub_current_view=rospy.Publisher("CurrentView",DataToSay,queue_size=10)
     self.subscriber=rospy.Subscriber("SendData",String,self.handle_data)
 
-    self.pub_choice_scenario=rospy.Publisher("choice_scenario",String,queue_size=1)
+    self.pub_choice_scenario=rospy.Publisher("choice_scenario",String,queue_size=10)
     self.pub_event_TM=rospy.Publisher("event_on_TM",String,queue_size=1)
     self.pub_event_VM=rospy.Publisher("event_on_VM",String,queue_size=1)
-    self.pub_restart_request=rospy.Publisher("HRI_restart_request",String,queue_size=1)
-
-
+    
     dir_path = os.path.dirname(os.path.realpath(__file__))
     ######### SCENARIO JSON LOAD #############
 
@@ -61,8 +59,10 @@ class HRIManager:
         self.receptionist = js.load(recep)
         self.receptionist['name']='receptionist'
 
-    self.nameToUse=[]
-    self.drinkToUse=[]
+
+    self.finalStep = None
+    self.nameToUse = []
+    self.drinkToUse = []
     self.ageToUse = []
     self.choosenName = None
     self.choosenDrink = None
@@ -82,9 +82,7 @@ class HRIManager:
     self.action_GM_TO_HRI_feedback=GmToHriFeedback()
     self.action_GM_TO_HRI_result=GmToHriResult()
     self.action_GM_TO_HRI_server.start()
-    self.json_for_GM=None
 
-    self.event_detected_flag=False
     rospy.loginfo('HRI MANAGER LAUNCHED')
 
 
@@ -92,31 +90,28 @@ class HRIManager:
     rospy.loginfo("Action initiating ...")
 
     success=True
-    self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback=''
-    json_goal=js.loads(goal.json_request)
-    if json_goal['whatToDo']=="Load scenario":
-      self.scenario_loaded=False
-      rospy.loginfo("LOADING SCENARIO...")
-      self.chargeScenario(json_goal)
-      while self.scenario_loaded==False and not rospy.is_shutdown():
-        # rospy.loginfo("scenario loading")
-        socketIO.wait(seconds=0.1)
-        
-      json_output=self.json_for_GM
+    self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='All clear'
+    rospy.loginfo("GOAL RECEIVED: "+goal.json_request)
 
-    elif json_goal['whatToDo']=="Load step":
-      self.event_detected_flag=False
-      self.updateCurrentStep(json_goal)
-      while self.event_detected_flag==False and not rospy.is_shutdown():
-        # rospy.loginfo("no event detected")
-        socketIO.wait(seconds=0.1)
-        
-      json_output=self.json_for_GM
+    time.sleep(2)
 
+
+    ##################"
+    for i in range(0,50):
+      if self.action_GM_TO_HRI_server.is_preempt_requested():
+        rospy.loginfo("Preempted GM TO HRI Action")
+        self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='Action preempted by client'
+        self.action_GM_TO_HRI_server.set_preempted()
+        success=False
+        break
+      rospy.loginfo("HELLOOOOOOOOOOOOOOOOOO")
+      time.sleep(1)
+
+    # ##################"
 
     self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
     if success:
-      self.action_GM_TO_HRI_result.Gm_To_Hri_output=js.dumps(json_output)
+      self.action_GM_TO_HRI_result.Gm_To_Hri_output=self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback
       rospy.loginfo("Action GM TO HRI succeeded")
       self.action_GM_TO_HRI_server.set_succeeded(self.action_GM_TO_HRI_result)
 
@@ -129,14 +124,14 @@ class HRIManager:
   # A l interieur de la vue on envoie au FLASK la vue a lance et les attributs
   def stepToStart(self,json,index,dataToUse):
     step = json
-
+    # rospy.loginfo("ETAPE A DEMARRER :"+step['name'])
+    # print('---------- STEP DANS STEPTOSTART ------',step)
+    # global indexFailure
+    # global currentAction
+    # rospy.loginfo(step)
     self.currentAction = step['action']
-
-    #NOUS EMBETE SEULEMENT DE TEMPS EN TEMPS SELON ABDEL
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       self.indexFailure = step['indexFailure']
-
-
     if step['action'] != '':
       self.nameAction = step['name']
       Views.start(self,step['action'],step, index, dataToUse)
@@ -165,12 +160,7 @@ class HRIManager:
         }
         socketIO.emit('startTimer',dataJsonToSendTimer, broadcast=True)
       rospy.loginfo("ETAPE DEMARREE: "+step['name'])
-      self.json_for_GM={
-        "indexStep": self.index,
-        "actionName": '',
-      }
-      self.event_detected_flag=True
-      # self.updateNextStep(index)
+      self.updateNextStep(index)
 
 ##################################### DATA RECEIVED #################################################
 
@@ -185,31 +175,10 @@ class HRIManager:
       self.data_received=True
       if(self.currentAction != 'confirm'):
         self.dataToUse = json_received['dataToUse']
-        self.json_for_GM={
-          "indexStep": self.index,
-          "actionName": self.currentAction,
-          "dataToUse": self.dataToUse
-        }
-        self.event_detected_flag=True
-
+      if(json_received['dataToUse'] != 'false'):
+        self.updateNextStep(self.index)
       else:
-        if(json_received['dataToUse'] != 'false'):
-          # self.updateNextStep(self.index)
-          self.json_for_GM={
-          "indexStep": self.index,
-          "actionName": self.currentAction,
-          "dataToUse": self.dataToUse
-          }
-          self.event_detected_flag=True
-        else:
-          # self.updatePreviousStep(self.index)
-          self.json_for_GM={
-          "indexStep": self.index,
-          "actionName": self.currentAction,
-          "dataToUse": self.dataToUse
-          }
-          self.event_detected_flag=True
-
+        self.updatePreviousStep(self.index)
       self.data_received=False
     else:
       rospy.logwarn('Le voice Manager envoie une donnee a la mauvaise etape: '+str(json_received['index'])+' au lieu de '+str(self.index))
@@ -223,12 +192,11 @@ class HRIManager:
 
 
   def dataJSstepDone(self,json):
-    self.event_detected_flag=True
+    
     if (self.data_received is False and self.index == self.currentIndexDataReceivedJS):
       rospy.loginfo("DONNEE RECUE DEPUIS TOUCH MANAGER")
       self.data_received=True
       if(self.currentAction != 'confirm'):
-        rospy.loginfo("ACTION SANS CONFIRM")
         self.dataToUse = json['data']
         rospy.loginfo("DONNEE TOUCH MANAGER: "+str(self.dataToUse))
         if('name' in self.nameAction):
@@ -238,15 +206,8 @@ class HRIManager:
         if('age' in self.nameAction):
           self.choosenAge = self.dataToUse
           self.ageToUse.append(self.choosenAge)
-        # self.updateNextStep(self.index)
-        self.json_for_GM={
-          "indexStep": self.index,
-          "actionName": self.currentAction,
-          "dataToUse": self.dataToUse,
-        }
-        self.event_detected_flag=True
+        self.updateNextStep(self.index)
       else:
-        rospy.loginfo("ACTION AVEC CONFIRM")
         rospy.loginfo("DONNEE TOUCH MANAGER: "+str(json['data']))
         if(json['data'] != 'false'):
           if('name' in self.nameAction):
@@ -255,19 +216,16 @@ class HRIManager:
             self.drinkToUse.append(self.choosenDrink)
           # if('age' in self.nameAction):
           #   self.ageToUse.append(self.choosenAge)
-          # self.updateNextStep(self.index)
-        # else:
-        #   self.updatePreviousStep(self.index)
-        self.json_for_GM={
-          "indexStep": self.index,
-          "actionName": self.currentAction,
-          "dataToUse": json['data'],
-        }
-        self.event_detected_flag=True
+          self.updateNextStep(self.index)
+        else:
+          self.updatePreviousStep(self.index)
     else:
       rospy.logwarn('Le touch Manager envoie une donnee a la mauvaise etape: '+str(self.currentIndexDataReceivedJS)+' au lieu de '+str(self.index))
 
     self.data_received=False
+      # print('la liste des noms',self.nameToUse)
+      # print('la liste des boissons',self.drinkToUse)
+      # print('la liste des ages',self.ageToUse)
   ###########################
 
 
@@ -278,30 +236,31 @@ class HRIManager:
   ####### On start le currentStep avec la fonction stepToStart
   def updateCurrentStep(self,json):
     # socketIO.wait(seconds=1)
-    # lastStep = None
-    # self.restart = 0
-    # if json['step'] != []:
-      # self.finalStep = json['data'][len(json['data']) - 1]
-    self.currentStep = json['step']
-    self.index=self.currentStep['order']
-    rospy.loginfo("ACTION CURRENT "+str(self.currentStep['action']))
-      # while self.currentStep != self.finalStep and self.restart == 0:
+    lastStep = None
+    # global index
+    # global currentStep
+    # global dataToUse
+    # global indexStepCompleted
+    # global restart
+    self.restart = 0
+    if json['data'] != []:
+      self.finalStep = json['data'][len(json['data']) - 1]
+      self.currentStep = json['data'][self.index]
+      while self.currentStep != self.finalStep and self.restart == 0:
         ############# STEP COMPLETED PUSH FOR RECEPTIONIST, on check si on arrive a la fin de l etape et on envoie
         ############# au REACT l index de l etape finie
-    if self.currentStep['action'] == '':
-      if self.currentStep['order'] != 0:
-        stepCompletedJson = {"idSteps": self.indexStepCompleted}
-        socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
-        rospy.loginfo("ETAPE TERMINEE: "+str(self.currentStep['name']))
-        self.indexStepCompleted = self.currentStep['order']
-      else:
-        self.indexStepCompleted = self.currentStep['order']
-        
+        if self.currentStep['action'] == '' and self.currentStep['order'] != 0:
+          stepCompletedJson = {"idSteps": self.indexStepCompleted}
+          socketIO.emit('CompleteStep',stepCompletedJson,broadcast=True)
+          rospy.loginfo("ETAPE TERMINEE: "+str(self.currentStep['name']))
+          self.indexStepCompleted = self.currentStep['order']
 
-    if self.currentStep != None:
-      self.stepToStart(self.currentStep,self.index,self.dataToUse)
-    socketIO.wait(seconds=0.1)
-    # self.restart_hri({""})
+        if (self.currentStep != None and self.currentStep != lastStep):
+          self.stepToStart(self.currentStep,self.index,self.dataToUse)
+          lastStep=self.currentStep
+        socketIO.wait(seconds=0.1)
+        self.currentStep = json['data'][self.index]
+    self.restart_hri({""})
   
   def updateNextStep(self,indexForNextStep):
     # global index
@@ -316,38 +275,47 @@ class HRIManager:
       self.index=indexForPreviousStep-1
 
 
-  def scenarioCharged(self,json):
-    # rospy.loginfo("JSON FOR GM "+str(json))
-    self.json_for_GM=json
-    self.scenario_loaded=True
-
-  def chooseScenario(self,json):
-    rospy.loginfo("choosing scenario...")
-    choosen_scenario = json['scenario']
-    self.pub_choice_scenario.publish(choosen_scenario)
-
-
   ########################## Chargement du scenario selectionne ################
+
 
   ######### On recoit depuis le REACT le nom du scenario selectionne et on charge le json approprie pour lui renvoyer ############
   def chargeScenario(self,json):
-      socketIO.emit('scenarioToCharged',json, broadcast=True)
-      # rospy.loginfo("SCENARIO CHARGE: "+str(json['scenario']))
-  
-  def send_gm_view_launched(self,json):
-    self.json_confirm_View_launch=json
-    rospy.loginfo(str(json['data']))
-    rospy.loginfo("Index de la vue lancee sur le Touch : "+str(json['index']))
+      # global dataJson
+      ####
+      # dataJson = self.load_scenario_json(json)
+      # print(dataJson)
+      ####
+      # global socketIO
+      choices = {self.receptionist['name']: self.receptionist, self.takeOutGarbage['name']: self.takeOutGarbage, self.inspection['name']: self.inspection, self.presentSchool['name']: self.presentSchool, self.creation['name']: self.creation}
+      dataJson = choices.get(json['scenario'], 'default')
+      dataJsonToSendScenario = {
+        "scenario": dataJson['name'],
+        "stepsList": dataJson['steps']
+      }
+      socketIO.emit('scenarioToCharged',dataJsonToSendScenario, broadcast=True)
+      rospy.loginfo("SCENARIO CHARGE: "+str(dataJson['name']))
+      self.pub_choice_scenario.publish(str(dataJson['name']))
+
+
 
   def restart_hri(self,json):
 
+    # rospy.logwarn("JSON RESTART :j"+str(json))
+    # global finalStep
     self.finalStep = None
+    # global currentStep
     self.currentStep = None
+    # global currentAction
     self.currentAction = None
+    # global index
     self.index=0
+    # global indexStepCompleted
     self.indexStepCompleted=0
+    # global dataToUse
     self.dataToUse=''
+    # global indexFailure
     self.indexFailure=None
+    # global restart
     self.restart = 1
 
     message_to_VoiceManager=DataToSay()
@@ -359,11 +327,6 @@ class HRIManager:
     message_to_VoiceManager.data_to_use_in_string=''
     self.pub_current_view.publish(message_to_VoiceManager)
     socketIO.emit('restartHRI',broadcast=True)
-    # self.pub_restart_request.publish("go")
-    self.json_for_GM={
-      "actionName": "RESTART HRI",
-    }
-    self.event_detected_flag=True    
     rospy.loginfo("RESTART HRI")
 
   #############
@@ -377,15 +340,12 @@ if __name__ == '__main__':
   from python_depend.views import Views
 
   hri = HRIManager()
-  # socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)
-  socketIO.on('askToChangeScenarioHRIM',hri.chooseScenario)
-  # socketIO.on('scenarioCharged', hri.updateCurrentStep)
-  socketIO.on('scenarioCharged',hri.scenarioCharged)
+  socketIO.on('askToChangeScenarioHRIM', hri.chargeScenario)
+  socketIO.on('scenarioCharged', hri.updateCurrentStep)
   # socketIO.on('NextStep', hri.updateNextStep)
   socketIO.on('indexDataReceivedJS', hri.indexDataJSstepDone)
   socketIO.on('dataReceivedJS', hri.dataJSstepDone)
   socketIO.on('resetHRI', hri.restart_hri)
-  socketIO.on('launchedView', hri.send_gm_view_launched)
 
   while not rospy.is_shutdown():
     socketIO.wait(seconds=1)

@@ -43,6 +43,12 @@ def handle_my_custom_event(json):
 def handle_my_custom_event(json):
     socketio.emit('scenarioCharged', json,broadcast=True)
     return("")
+
+@socketio.on('viewLaunched')
+@cross_origin()
+def handle_my_custom_event(json):
+    socketio.emit('launchedView', json,broadcast=True)
+    return("")
     
 #### FROM HRIM to REACT #### STEP 5 et 6 On a une etape qui commence on envoie au REACT le currentStep
 @socketio.on('stepCurrent')

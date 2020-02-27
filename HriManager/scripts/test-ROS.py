@@ -21,7 +21,8 @@ class TestROS(object):
 
 
         self.sub_choice_scenario=rospy.Subscriber("choice_scenario",String,self.handle_choice_scenario)
-        rospy.wait_for_message("choice_scenario")
+        rospy.loginfo("wait for choice scenario")
+        rospy.wait_for_message("choice_scenario",String)
         self.client_action_GmToHri=actionlib.SimpleActionClient("action_GmToHri",GmToHriAction)
         rospy.loginfo("wait for action server")
         self.client_action_GmToHri.wait_for_server()
