@@ -54,7 +54,10 @@ class AudioMessage(object):
                         
 
                 if stream is None:
-                    rospy.logerr("No mic device found")
+                    stream = pa.open(format=pyaudio.paInt16, channels=1,
+                                                        rate=16000, input=True, frames_per_buffer=1024)
+                    stream.start_stream()
+                    rospy.logwarn("No mic CODEC device found")
         else:
             rospy.logerr("No input means provided. Please use the launch file instead")
 

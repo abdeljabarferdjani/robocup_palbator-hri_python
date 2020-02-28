@@ -106,6 +106,7 @@ class LocalManagerWrapperPalbator:
         # goal_id = json.loads(payload)["id"]
         
         goal=GmToHriGoal(payload)
+        rospy.loginfo("LWM : GOAL TO SEND "+str(goal))
         self.client_action_GmToHri.send_goal(goal)
         rospy.loginfo("LMW : GOAL SENT TO ACTION")
         
@@ -154,6 +155,7 @@ class LocalManagerWrapperPalbator:
             rospy.loginfo("LMW : GOT GOAL FROM ACTION")
             resultat=result_action.Gm_To_Hri_output
             json_resultat=json.loads(resultat)
+            rospy.loginfo("LMW  JSON RESULT: "+str(json_resultat))
 
             # Consume result
             # self._memory.insertData(result_channel, json.dumps(dict()))

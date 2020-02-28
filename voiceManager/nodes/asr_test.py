@@ -88,10 +88,10 @@ class ASRModule(object):
             rospy.loginfo("--------")
             try:
                 tts=d['speech']['said']
-                if tts and "{drink}" in tts:
-                    tts=tts.format(drink=dataToUse)
-                elif tts and "{name}" in tts:
-                    tts=tts.format(name=dataToUse)
+                # if tts and "{drink}" in tts:
+                #     tts=tts.format(drink=dataToUse)
+                # elif tts and "{name}" in tts:
+                #     tts=tts.format(name=dataToUse)
 
             ###########################"
             # ACTION ESPEAK"
@@ -123,15 +123,15 @@ class ASRModule(object):
                 pass
             ###################################
             #   DECOMMENTER POUR SETUP DETECTION
-            view_id=d['order']
-            self.current_view_id=view_id
+            # view_id=d['order']
+            # self.current_view_id=view_id
 
-            view_action=d['action']
-            self.current_view_action=view_action
-            self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
-            if self.dictionary_choose != "":
-            	rospy.loginfo("Load new dict config ...")
-                self.setup_params()
+            # view_action=d['action']
+            # self.current_view_action=view_action
+            # self.dictionary_choose=self.parser_view_action_to_dic_mode(view_action)
+            # if self.dictionary_choose != "":
+            # 	rospy.loginfo("Load new dict config ...")
+            #     self.setup_params()
 
 
     def setup_params(self):

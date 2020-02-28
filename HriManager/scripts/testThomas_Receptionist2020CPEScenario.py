@@ -11,7 +11,7 @@ from LocalManagerWrapperV2 import LocalManagerWrapperPalbator
 import json
 import time
 import math
-
+from copy import deepcopy
 
 class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus,
                                 #   AbstractScenarioAction, AbstractScenarioService):
@@ -52,13 +52,20 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         self.people_age_by_id = {}
         self.steps = None
         self.exit_scenario=False
+        self.current_guest=None
 
         # - Constants
         # self._living_room = self.find_by_id(self._locations, "livingRoom")
         # self._entrance = self.find_by_id(self._locations, "entrance")
-        # self.people_name_by_id[0] = "John"
-        # self.people_age_by_id[0] = 40
-        # self.people_drink_by_id[0] = self.find_by_id(self._drinks, "coke")["name"]
+        try:
+            self.people_name_by_id['John'] = "John"
+            self.people_age_by_id['John'] = 40
+            self.people_drink_by_id['John'] = 'coke'
+        except Exception as e:
+            rospy.logerr("SCN : "+str(e))
+
+        rospy.loginfo("SCN : DATA STORED: person: "+str(self.people_name_by_id) +" drink : "+str(self.people_drink_by_id)+" age : "+str(self.people_age_by_id))
+
         rospy.loginfo("{class_name}: CONSTANTS SET.".format(class_name=self.__class__))
 
         # - Variables
@@ -76,15 +83,42 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
     def process_json_result(self,json_result):
         if json_result['actionName']=="":
             self.current_index_scenario=self.current_index_scenario+1
-        elif json_result['actionName']=='confirm' and json_result['dataToUse']=='false':
-            self.current_index_scenario=self.current_index_scenario-1
+        elif json_result['actionName']=='confirm':
+            if json_result['dataToUse']=='false':
+                self.current_index_scenario=self.current_index_scenario-1
+                if "name" in json_result['name']:
+                    self.choosen_name=""
+                elif "drink" in json_result['name']:
+                    self.choosen_drink=""
+            else:
+                self.current_index_scenario=self.current_index_scenario+1
+                if "name" in json_result['name']:
+                    self.people_name_by_id[self.current_guest] = self.choosen_name
+                elif "drink" in json_result['name']:
+                    self.people_drink_by_id[self.current_guest] = self.choosen_drink
         
+        elif json_result['actionName']=='askName':
+            self.current_index_scenario=self.current_index_scenario+1
+            self.current_guest=json_result['id_guest']
+            self.choosen_name=json_result['dataToUse']
+        
+        elif json_result['actionName']=='askDrink':
+            self.current_index_scenario=self.current_index_scenario+1
+            self.current_guest=json_result['id_guest']
+            self.choosen_drink=json_result['dataToUse']
+        
+        elif json_result['actionName']=='askAge':
+            self.current_index_scenario=self.current_index_scenario+1
+            self.current_guest=json_result['id_guest']
+            self.people_age_by_id[self.current_guest] = json_result['dataToUse']
+            
         elif json_result['actionName']=="RESTART HRI":
             rospy.loginfo("Waiting for new scenario")
             self.exit_scenario=True
             
         else:
             self.current_index_scenario=self.current_index_scenario+1
+
     def startScenario(self):
         rospy.loginfo("""
         ######################################
@@ -108,16 +142,54 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         self._lm_wrapper.client_action_GmToHri.wait_for_server()
 
         rospy.loginfo("SCN : LOADING CONFIG FOR SCENARIO")
-        ordered_steps_list = self._lm_wrapper.timeboard_send_steps_list(
-            self.steps, self._scenario["name"], self.NO_TIMEOUT)[1]
-        self.steps=ordered_steps_list['data']
+        # ordered_steps_list = self._lm_wrapper.timeboard_send_steps_list(
+        #     self.steps, self._scenario["name"], self.NO_TIMEOUT)[1]
+        # self.steps=ordered_steps_list['data']
         # self._lm_wrapper.timeboard_set_timer_state(True, self.NO_TIMEOUT)
 
         self.current_index_scenario=0
         while self.current_index_scenario<len(self.steps) and not rospy.is_shutdown():
             rospy.loginfo("SCN : CURRENT STEP INDEX : "+str(self.current_index_scenario))
             rospy.loginfo("NEW STEP")
-            result=self._lm_wrapper.timeboard_set_current_step(self.steps[self.current_index_scenario],self.current_index_scenario,self.NO_TIMEOUT)[1]
+           
+            X=deepcopy(self.steps[self.current_index_scenario])
+
+            if 'speech' in X.keys():
+                if "{drink}" in X['speech']['said']:
+                    if self.current_guest in self.people_drink_by_id.keys():
+                        rospy.loginfo("SCN : SELECT CURRENT GUEST SAVED DRINK "+self.people_drink_by_id[self.current_guest])
+                        X['speech']['said']=X['speech']['said'].format(drink=self.people_drink_by_id[self.current_guest])
+                        X['speech']['title']=X['speech']['title'].format(drink=self.people_drink_by_id[self.current_guest])
+                        if 'what' in X['arguments'].keys():
+                            X['arguments']['what']=X['arguments']['what'].format(drink=self.people_drink_by_id[self.current_guest])
+                    else:
+                        rospy.loginfo("SCN : SELECT CHOOSEN DRINK "+self.choosen_drink)
+                        X['speech']['said']=X['speech']['said'].format(drink=self.choosen_drink)
+                        X['speech']['title']=X['speech']['title'].format(drink=self.choosen_drink)
+                        if 'what' in X['arguments'].keys():
+                            X['arguments']['what']=X['arguments']['what'].format(drink=self.choosen_drink)
+                
+            
+                elif "{name}" in X['speech']['said']:
+                    if self.current_guest in self.people_name_by_id.keys():
+                        rospy.loginfo("SCN : SELECT CURRENT GUEST SAVED NAME "+self.people_name_by_id[self.current_guest])
+                        X['speech']['said']=X['speech']['said'].replace("{name}",self.people_name_by_id[self.current_guest])
+                        X['speech']['title']=X['speech']['title'].format(name=self.people_name_by_id[self.current_guest])
+                        if 'what' in X['arguments'].keys():
+                            X['arguments']['what']=X['arguments']['what'].format(name=self.people_name_by_id[self.current_guest])
+                    else:
+                        rospy.loginfo("SCN : SELECT CHOOSEN NAME "+self.choosen_name)
+                        X['speech']['said']=X['speech']['said'].replace("{name}",self.choosen_name)
+                        X['speech']['title']=X['speech']['title'].format(name=self.choosen_name)
+                        if 'what' in X['arguments'].keys():
+                            X['arguments']['what']=X['arguments']['what'].format(name=self.choosen_name)
+
+
+
+                result=self._lm_wrapper.timeboard_set_current_step(X,self.current_index_scenario,self.NO_TIMEOUT)[1]
+            else:
+                result=self._lm_wrapper.timeboard_set_current_step(self.steps[self.current_index_scenario],self.current_index_scenario,self.NO_TIMEOUT)[1]
+            
             self.process_json_result(result)
             if self.exit_scenario==True:
                 self.exit_scenario=False
@@ -371,7 +443,7 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
                 Finished executing the {scenario_name} Scenario...
                 ######################################
                 """.format(scenario_name=self._scenario["name"]))
-
+        rospy.loginfo("SCN : DATA STORED: person: "+str(self.people_name_by_id) +" drink : "+str(self.people_drink_by_id)+" age : "+str(self.people_age_by_id))
     # def gmBusListener(self, msg):
     #     if self._status == self.WAIT_ACTION_STATUS:
     #         self.checkActionStatus(msg)
