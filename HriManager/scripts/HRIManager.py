@@ -12,7 +12,7 @@ import actionlib
 from HriManager.msg import GmToHriAction, GmToHriFeedback, GmToHriResult
 import time
 
-
+from copy import deepcopy
 class HRIManager:
   # def load_scenario_json(self,json):
   #   name_scenario_unicode = json['scenario']
@@ -85,6 +85,8 @@ class HRIManager:
     self.json_for_GM=None
 
     self.event_detected_flag=False
+
+    self.stepsList=None
     rospy.loginfo('HRI MANAGER LAUNCHED')
 
 
@@ -94,24 +96,23 @@ class HRIManager:
     success=True
     self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback=''
     json_goal=js.loads(goal.json_request)
-    # if json_goal['whatToDo']=="Load scenario":
-    #   self.scenario_loaded=False
-    #   rospy.loginfo("LOADING SCENARIO...")
-    #   rospy.loginfo("HRI : JSON GOAL "+str(json_goal))
-    #   self.chargeScenario(json_goal)
-    #   while self.scenario_loaded==False and not rospy.is_shutdown():
-    #     # rospy.loginfo("scenario loading")
-    #     socketIO.wait(seconds=0.1)
+    if json_goal['whatToDo']=="Load scenario":
+      self.scenario_loaded=False
+      rospy.loginfo("Getting steps list...")
+      self.stepsList=json_goal['stepsList']
+      # while self.scenario_loaded==False and not rospy.is_shutdown():
+      #   # rospy.loginfo("scenario loading")
+      #   socketIO.wait(seconds=0.1)
         
-    #   json_output=self.json_for_GM
+      json_output="Steps received"
 
-    if json_goal['whatToDo']=="Load step":
-      if json_goal['step']['order']==0:
-        if self.choosen_scenario=='receptionist':
-          json_charge_scenario={
-            'scenario': 'receptionist'
-          }
-          self.chargeScenario(json_charge_scenario)
+    elif json_goal['whatToDo']=="Load step":
+      if json_goal['stepIndex']==0:
+        # if self.choosen_scenario=='receptionist':
+        json_charge_scenario={
+          'scenario': self.choosen_scenario
+        }
+        self.chargeScenario(json_charge_scenario)
       self.event_detected_flag=False
       self.updateCurrentStep(json_goal)
       while self.event_detected_flag==False and not rospy.is_shutdown():
@@ -120,6 +121,11 @@ class HRIManager:
         
       json_output=self.json_for_GM
 
+    # rospy.loginfo("CHOOSEN NAME : "+str(self.choosenName))
+    # rospy.loginfo("CHOOSEN DRINK : "+str(self.choosenDrink))
+
+    # rospy.loginfo("NAME LIST : "+str(self.nameToUse))
+    # rospy.loginfo("DRINK LIST : "+str(self.drinkToUse))
 
     self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
     if success:
@@ -139,7 +145,7 @@ class HRIManager:
 
     self.currentAction = step['action']
 
-    #NOUS EMBETE SEULEMENT DE TEMPS EN TEMPS SELON ABDEL
+    
     if(step['action'] == 'confirm' and 'indexFailure' in step): 
       self.indexFailure = step['indexFailure']
 
@@ -151,10 +157,10 @@ class HRIManager:
       messageDataToSay=DataToSay()
       messageDataToSay.json_in_string=js.dumps(step)
       if not dataToUse is None:
-        # if "drink" in self.nameAction and not "Confirm" in self.nameAction:
-        #   messageDataToSay.data_to_use_in_string=str(self.nameToUse[-1])
-        # else:
-        messageDataToSay.data_to_use_in_string=str(dataToUse)
+        if "drink" in self.nameAction and not "Confirm" in self.nameAction:
+          messageDataToSay.data_to_use_in_string=str(self.nameToUse[-1])
+        else:
+          messageDataToSay.data_to_use_in_string=str(dataToUse)
       else:
         messageDataToSay.data_to_use_in_string=''
       self.pub_current_view.publish(messageDataToSay)
@@ -175,6 +181,8 @@ class HRIManager:
       self.json_for_GM={
         "indexStep": self.index,
         "actionName": '',
+        "NextToDo": "next",
+        "NextIndex": self.index+1
       }
       self.event_detected_flag=True
       # self.updateNextStep(index)
@@ -196,35 +204,74 @@ class HRIManager:
           self.json_for_GM={
             "indexStep": self.index,
             "actionName": self.currentAction,
-            "dataToUse": self.dataToUse
+            "dataToUse": self.dataToUse,
+            "NextToDo": "next",
+            "NextIndex": self.index+1
           }
           self.event_detected_flag=True
         else:
-          self.dataToUse = json_received['dataToUse']
-          self.json_for_GM={
-            "indexStep": self.index,
-            "actionName": self.currentAction,
-            "dataToUse": self.dataToUse,
-          }
-          self.event_detected_flag=True
+          if self.currentAction== 'askAge':
+            rospy.loginfo("NAME LIST : "+str(self.nameToUse))
+            rospy.loginfo("DRINK LIST : "+str(self.drinkToUse))
+            self.dataToUse = json_received['dataToUse']
+            self.json_for_GM={
+              "indexStep": self.index,
+              "actionName": self.currentAction,
+              "dataToUse": self.dataToUse,
+              "NextToDo": "next",
+              "NextIndex": self.index+1,
+              "saveData":{
+                "who": self.currentStep['arguments']['who'],
+                "name": self.nameToUse[-1],
+                "drink": self.drinkToUse[-1],
+                "age": self.dataToUse
+              }
+            }
+            self.event_detected_flag=True
+          else:
+            self.dataToUse = json_received['dataToUse']
+            if self.currentAction== 'askName':
+              self.choosenName=self.dataToUse
+            else:
+              self.choosenDrink=self.dataToUse
+            self.json_for_GM={
+              "indexStep": self.index,
+              "actionName": self.currentAction,
+              "dataToUse": self.dataToUse,
+              "NextToDo": "next",
+              "NextIndex": self.index+1
+            }
+            self.event_detected_flag=True
 
       else:
         if(json_received['dataToUse'] != 'false'):
           # self.updateNextStep(self.index)
+          if "name" in self.currentStep['name']:
+            self.nameToUse.append(self.choosenName)
+          elif "drink" in self.currentStep['name']:
+            self.drinkToUse.append(self.choosenDrink)
           self.json_for_GM={
           "indexStep": self.index,
           "actionName": self.currentAction,
           "dataToUse": self.dataToUse,
-          "name": self.currentStep['name']
+          "name": self.currentStep['name'],
+          "NextToDo": "next",
+          "NextIndex": self.index+1
           }
           self.event_detected_flag=True
         else:
           # self.updatePreviousStep(self.index)
+          if "name" in self.currentAction:
+            self.choosenName=''
+          elif "drink" in self.currentAction:
+            self.choosenDrink=''
           self.json_for_GM={
           "indexStep": self.index,
           "actionName": self.currentAction,
           "dataToUse": self.dataToUse,
-          "name": self.currentStep['name']
+          "name": self.currentStep['name'],
+          "NextToDo": "previous",
+          "NextIndex": self.index-1
           }
           self.event_detected_flag=True
 
@@ -255,37 +302,76 @@ class HRIManager:
             "indexStep": self.index,
             "actionName": self.currentAction,
             "dataToUse": self.dataToUse,
+            "NextToDo": "next",
+            "NextIndex": self.index+1
           }
           self.event_detected_flag=True
         else:
-          self.json_for_GM={
-            "indexStep": self.index,
-            "actionName": self.currentAction,
-            "dataToUse": self.dataToUse,
-            "id_guest": self.currentStep['arguments']['who']
-          }
-          self.event_detected_flag=True
+          
+          if self.currentAction=='askAge':
+            rospy.loginfo("NAME LIST : "+str(self.nameToUse))
+            rospy.loginfo("DRINK LIST : "+str(self.drinkToUse))
+            self.json_for_GM={
+              "indexStep": self.index,
+              "actionName": self.currentAction,
+              "dataToUse": self.dataToUse,
+              "NextToDo": "next",
+              "NextIndex": self.index+1,
+              "saveData":{
+                "who": self.currentStep['arguments']['who'],
+                "name": self.nameToUse[-1],
+                "drink": self.drinkToUse[-1],
+                "age": self.dataToUse
+              }
+            }
+            self.event_detected_flag=True
+          else:
+            if self.currentAction== 'askName':
+              self.choosenName=self.dataToUse
+            else:
+              self.choosenDrink=self.dataToUse
+            self.json_for_GM={
+              "indexStep": self.index,
+              "actionName": self.currentAction,
+              "dataToUse": self.dataToUse,
+              "id_guest": self.currentStep['arguments']['who'],
+              "NextToDo": "next",
+              "NextIndex": self.index+1
+            }
+            self.event_detected_flag=True
       else:
         rospy.loginfo("ACTION AVEC CONFIRM")
         rospy.loginfo("DONNEE TOUCH MANAGER: "+str(json['data']))
         if(json['data'] != 'false'):
+          if "name" in self.currentStep['name']:
+            self.nameToUse.append(self.choosenName)
+          elif "drink" in self.currentStep['name']:
+            self.drinkToUse.append(self.choosenDrink)
           # self.updateNextStep(self.index)
           self.json_for_GM={
           "indexStep": self.index,
           "actionName": self.currentAction,
           "dataToUse": json['data'],
           "id_guest": self.currentStep['arguments']['who'],
-          "name": self.currentStep['name']
+          "name": self.currentStep['name'],
+          "NextToDo": "next",
+          "NextIndex": self.index+1
           }
           self.event_detected_flag=True
         else:
           # self.updatePreviousStep(self.index)
+          if "name" in self.currentStep['name']:
+            self.choosenName=''
+          elif "drink" in self.currentStep['name']:
+            self.choosenDrink=''
           self.json_for_GM={
           "indexStep": self.index,
           "actionName": self.currentAction,
           "dataToUse": json['data'],
           "id_guest": self.currentStep['arguments']['who'],
-          "name": self.currentStep['name']
+          "name": self.currentStep['name'],
+          "NextToDo": "previous",
+          "NextIndex": self.index-1
           }
           self.event_detected_flag=True
 
@@ -307,8 +393,8 @@ class HRIManager:
     # self.restart = 0
     # if json['step'] != []:
       # self.finalStep = json['data'][len(json['data']) - 1]
-    self.currentStep = json['step']
-    self.index=self.currentStep['order']
+    self.currentStep = deepcopy(self.stepsList[json['stepIndex']])
+    self.index=json['stepIndex']
     rospy.loginfo("ACTION CURRENT "+str(self.currentStep['action']))
       # while self.currentStep != self.finalStep and self.restart == 0:
         ############# STEP COMPLETED PUSH FOR RECEPTIONIST, on check si on arrive a la fin de l etape et on envoie
@@ -387,6 +473,8 @@ class HRIManager:
     # self.pub_restart_request.publish("go")
     self.json_for_GM={
       "actionName": "RESTART HRI",
+      "NextToDo": "",
+      "NextIndex": ""
     }
     self.event_detected_flag=True    
     rospy.loginfo("RESTART HRI")

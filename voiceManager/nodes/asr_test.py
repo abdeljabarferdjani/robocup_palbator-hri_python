@@ -88,10 +88,10 @@ class ASRModule(object):
             rospy.loginfo("--------")
             try:
                 tts=d['speech']['said']
-                # if tts and "{drink}" in tts:
-                #     tts=tts.format(drink=dataToUse)
-                # elif tts and "{name}" in tts:
-                #     tts=tts.format(name=dataToUse)
+                if tts and "{drink}" in tts:
+                    tts=tts.format(drink=dataToUse)
+                elif tts and "{name}" in tts:
+                    tts=tts.format(name=dataToUse)
 
             ###########################"
             # ACTION ESPEAK"

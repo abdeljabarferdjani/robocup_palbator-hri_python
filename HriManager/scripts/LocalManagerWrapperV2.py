@@ -176,6 +176,15 @@ class LocalManagerWrapperPalbator:
     # Start of API between GeneralManager and HRI
     ####################################################################################################################
 
+    def empty_action(self):
+        pass
+
+    def point_to(self):
+        pass
+
+    def find_an_empty_chair(self):
+        pass
+    
     def ask_name(self, speech, people, timeout):
         """
         Start the view 'askName'
@@ -593,7 +602,7 @@ class LocalManagerWrapperPalbator:
     #     status, result = self._execute_request("stepSkipped", payload, timeout)
     #     return status
 
-    def timeboard_set_current_step(self, step, step_index, timeout):
+    def timeboard_set_current_step(self, step_index, timeout):
         """
         Set current a steps
 
@@ -613,7 +622,7 @@ class LocalManagerWrapperPalbator:
 
         payload = json.dumps({
             'whatToDo': "Load step",
-            "step": step,
+            "stepIndex": step_index,
         })
         status, result = self._execute_request("currentStep", payload, timeout)
         return status, result
