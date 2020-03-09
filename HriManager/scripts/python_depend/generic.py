@@ -2,14 +2,17 @@ import json
 from flask_socketio import SocketIO, send, emit
 from templates import app
 from flask_cors import CORS, cross_origin
-from __main__ import socketIO
+# from __main__ import socketIO
 
 global stepCompletedJson
 
 
 class Generic:
-    @staticmethod
-    def start(js_view_key, local_manager, arguments):
+
+    def __init__(self,socket):
+        self.socket=socket
+    # @staticmethod
+    def start(self,js_view_key, local_manager, arguments):
         Generic.action_id = arg_fetcher.get_argument(arguments, 'id')
         if not Generic.action_id:
             logger.log("Missing id in {0} action arguments".format(js_view_key), "Views Manager", logger.ERROR)

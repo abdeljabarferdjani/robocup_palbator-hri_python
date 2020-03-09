@@ -2,7 +2,7 @@ import json
 from flask_socketio import SocketIO, send, emit
 from templates import app
 from flask_cors import CORS, cross_origin
-from __main__ import socketIO
+# from __main__ import socketIO
 
 import os 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,10 +14,12 @@ with open(dir_path+'/../templates/public/json/speciality.json') as spe:
     speciality = json.load(spe)
 
 class AskSpeciality:
-    global dataJsonToSendCurrentView
-    global dataJsonToSendCurrentView
-    @staticmethod
-    def start(js_view_key, arguments, index, dataToUse):
+
+    def __init__(self,socket):
+        self.socket=socket
+
+    # @staticmethod
+    def start(self,js_view_key, arguments, index, dataToUse):
 
         text = arguments['speech']['title']
         
@@ -33,7 +35,7 @@ class AskSpeciality:
                 "step":arguments,
                 "index":index
         }
-        socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
+        self.socket.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)
         # socketio.sleep(5)
         # stepCompletedJson = {"idSteps": index}

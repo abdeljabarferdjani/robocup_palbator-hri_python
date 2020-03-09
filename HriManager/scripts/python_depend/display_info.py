@@ -2,13 +2,16 @@ import json
 from flask_socketio import SocketIO, send, emit
 from templates import app
 from flask_cors import CORS, cross_origin
-from __main__ import socketIO
+# from __main__ import socketIO
 
 global stepCompletedJson
 
 class DisplayInfo:
-    @staticmethod
-    def start(js_view_key, arguments, index, dataToUse):
+
+    def __init__(self,socket):
+        self.socket=socket
+    # @staticmethod
+    def start(self,js_view_key, arguments, index, dataToUse):
 
         if(dataToUse != 'ETI' and dataToUse != 'CGP'):
             desc = arguments['speech']['description']
@@ -33,7 +36,7 @@ class DisplayInfo:
                 "index":index
         }
 
-        socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
+        self.socket.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
     # @staticmethod
     # def received_data(local_manager, data):

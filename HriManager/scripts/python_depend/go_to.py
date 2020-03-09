@@ -2,7 +2,7 @@ import json
 from flask_socketio import SocketIO, send, emit
 from templates import app
 from flask_cors import CORS, cross_origin
-from __main__ import socketIO
+# from __main__ import socketIO
 
 global stepCompletedJson
 
@@ -10,8 +10,12 @@ global stepCompletedJson
 #     locations = json.load(l)
 
 class GoTo:
-    @staticmethod
-    def start(js_view_key, arguments, index, dataToUse):
+
+    def __init__(self,socket):
+        self.socket=socket
+
+    # @staticmethod
+    def start(self,js_view_key, arguments, index, dataToUse):
         # GoTo.action_id = arg_fetcher.get_argument(arguments, 'id')
         # if not GoTo.action_id:
         #     logger.log("Missing id in {0} action arguments".format(js_view_key), "Views Manager", logger.ERROR)
@@ -38,7 +42,7 @@ class GoTo:
                 "step":arguments,
                 "index":index
         }
-        socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
+        self.socket.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
         # emit('currentStep',dataJsonToSendCurrentStep)
         # socketio.sleep(5)
 

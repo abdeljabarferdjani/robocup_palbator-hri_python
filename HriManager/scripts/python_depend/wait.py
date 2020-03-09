@@ -2,15 +2,17 @@ import json
 from templates import app
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, send, emit
-from __main__ import socketIO
+# from __main__ import socketIO
 
 
 global stepCompletedJson
 
 # La methode Start envoie au FLASK la VUE a lancer avec les bons attributs
 class Wait:
-    @staticmethod
-    def start(js_view_key, arguments, index, dataToUse):
+    def __init__(self,socket):
+        self.socket=socket
+    # @staticmethod
+    def start(self,js_view_key, arguments, index, dataToUse):
         
         time = arguments['arguments']['time']
         text = arguments['speech']['title']
@@ -24,7 +26,7 @@ class Wait:
                 "step":arguments,
                 "index":index
         }
-        socketIO.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
+        self.socket.emit('currentViewToSend',dataJsonToSendCurrentView,broadcast=True)
 
 
     # @staticmethod
