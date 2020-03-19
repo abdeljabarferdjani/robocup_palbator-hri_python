@@ -39,6 +39,7 @@ In order to completely launch the HRI,
 - sudo apt-get install espeak libespeak-dev
 - sudo apt-get install mbrola
 - sudo apt-get install mbrola-*
+- sudo python -m pip install scipy
 
 ## Launch TTS Manager
 - roslaunch rapp_text_to_speech_espeak text_to_speech_espeak.launch
