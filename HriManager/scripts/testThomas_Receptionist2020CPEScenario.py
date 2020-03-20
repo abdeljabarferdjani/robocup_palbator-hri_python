@@ -32,7 +32,7 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
 
 
         # with open(config.scenario_filepath) as data:
-        ws = "/home/student/Bureau/projet_abdel/test_workspace_abdel"
+        ws = "/home/student/Bureau/workspace_palbator_dev"
         # ws = "/home/astro/catkin_robocup2019"
         with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/scenario.json".format(ws)) as data:
             self._scenario = json.load(data)

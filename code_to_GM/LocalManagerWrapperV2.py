@@ -656,7 +656,7 @@ class LocalManagerWrapperPalbator:
         status, result = self._execute_request("currentStep", payload, timeout)
         return status, result
 
-    def timeboard_present_people(self, step_index, people, drinks, ages, timeout):
+    def timeboard_present_people(self, step_index, people, timeout):
         """
         Set current a steps
 
@@ -677,9 +677,7 @@ class LocalManagerWrapperPalbator:
         payload = json.dumps({
                 'whatToDo': "Load step",
                 "stepIndex": step_index,
-                "people": people,
-                "drinks": drinks,
-                "ages": ages
+                "people": people
             })
         status, result = self._execute_request("currentStep", payload, timeout)
         return status, result

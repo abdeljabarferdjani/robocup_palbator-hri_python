@@ -27,8 +27,8 @@ class PresentPerson:
         text = arguments['speech']['said']
         who = arguments['arguments']['who']
         to = arguments['arguments']['to']
-        print("WHO!!")
-        print(who)
+        # print("WHO!!")
+        # print(who)
         dataJsonToSendCurrentView = {
                 "view": js_view_key,
                 'data': {
@@ -36,7 +36,8 @@ class PresentPerson:
                     'people':{
                         'who': {
                             'drink': who['drinkObj'],
-                            'name': who['name']    
+                            'name': who['name'],
+                            'guestPhotoPath': who['guestPhotoPath']   
                         },
                         'to': to
                     }   

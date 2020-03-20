@@ -46,11 +46,11 @@ class AudioMessage(object):
             else:
                 for i in range(pa.get_device_count()):
                     dev = pa.get_device_info_by_index(i)
-                    if dev.get('name')=='USB Audio CODEC: - (hw:1,0)':
+                    # if dev.get('name')=='USB Audio CODEC: - (hw:1,0)':
                 # Initializing pyaudio for input from system microhpone
-                        stream = pa.open(format=pyaudio.paInt16, channels=1,
-                                                        rate=16000, input=True, input_device_index=6, frames_per_buffer=1024)
-                        stream.start_stream()
+                    #stream = pa.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, input_device_index=7, frames_per_buffer=1024)
+                    stream = pa.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+                    stream.start_stream()
                         
 
                 if stream is None:
@@ -67,6 +67,7 @@ class AudioMessage(object):
             if buf:
                 # Publish audio to topic
                 self.pub_.publish(buf)
+		#rospy.logwarn("jbeefibzibuizbvuizevr : config default : "+str(pa.get_default_input_device_info()))
                 if _rate_bool:
                     rate.sleep()
             else:

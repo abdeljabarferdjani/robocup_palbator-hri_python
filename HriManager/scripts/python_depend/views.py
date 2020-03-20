@@ -18,7 +18,8 @@ from show_video import ShowVideo
 from ask_open_door import AskOpenDoor
 from display_info import DisplayInfo
 from wait import Wait
-
+from point_to import PointTo
+from find import Find
 
 class Views:
     def __init__(self,socket):
@@ -47,8 +48,8 @@ class Views:
             'serveDrinks': None,
             'showVideo': ShowVideo,
             'wait': Wait, # time,
-            'pointTo': Wait,
-            'find': Wait
+            'pointTo': PointTo,
+            'find': Find,
         }
         self.view=None
 

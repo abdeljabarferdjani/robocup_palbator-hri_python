@@ -2,10 +2,10 @@ __author__ = 'Benoit Renault'
 import rospy
 import collections
 
-# from AbstractScenario import AbstractScenario
-# from AbstractScenarioAction import AbstractScenarioAction
-# from AbstractScenarioBus import AbstractScenarioBus
-# from AbstractScenarioService import AbstractScenarioService
+from AbstractScenario import AbstractScenario
+from AbstractScenarioAction import AbstractScenarioAction
+from AbstractScenarioBus import AbstractScenarioBus
+from AbstractScenarioService import AbstractScenarioService
 from LocalManagerWrapperV2 import LocalManagerWrapperPalbator
 import sys
 import json
@@ -17,14 +17,15 @@ from actionlib_msgs.msg import GoalStatus
 
 
 
-class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus,
-                                #   AbstractScenarioAction, AbstractScenarioService):
+
+class Receptionist2020CPEScenario(AbstractScenario, AbstractScenarioBus,
+                                  AbstractScenarioAction, AbstractScenarioService):
     DEFAULT_TIMEOUT = 5.0
     NO_TIMEOUT = -1.0
 
     def __init__(self, config):
-        # AbstractScenarioBus.__init__(self, config)
-        # AbstractScenarioAction.__init__(self, config)
+        AbstractScenarioBus.__init__(self, config)
+        AbstractScenarioAction.__init__(self, config)
         # self._lm_wrapper = LocalManagerWrapper(config.ip_address, config.tcp_port, config.prefix)
         
         # TODO : Remove Hardocoded values and get them from config
@@ -32,22 +33,26 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
 
 
         # with open(config.scenario_filepath) as data:
-        ws = "/home/student/Bureau/projet_abdel/test_workspace_abdel"
-        # ws = "/home/astro/catkin_robocup2019"
-        with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/scenario.json".format(ws)) as data:
+        self.ws = "/home/student/Bureau/workspace_palbator_dev"
+
+        with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/RECEPTIONIST_2020_CPE_SCENARIO.json".format(self.ws)) as data:
             self._scenario = json.load(data)
             self._scenario['name']='receptionist'
 
-        with open("{0}/src/HriManager/scripts/templates/public/json/drinks.json".format(ws)) as data:
+        # with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/test_views.json".format(self.ws)) as data:
+        #     self._scenario = json.load(data)
+        #     self._scenario['name']='receptionist'
+
+        with open("{0}/src/HriManager/scripts/templates/public/json/drinks.json".format(self.ws)) as data:
             self._drinks = json.load(data)
 
-        with open("{0}/src/HriManager/scripts/templates/public/json/locations.json".format(ws)) as data:
+        with open("{0}/src/HriManager/scripts/templates/public/json/locations.json".format(self.ws)) as data:
             self._locations = json.load(data)
 
-        with open("{0}/src/HriManager/scripts/templates/public/json/people.json".format(ws)) as data:
+        with open("{0}/src/HriManager/scripts/templates/public/json/people.json".format(self.ws)) as data:
             self._people = json.load(data)
 
-        with open("{0}/src/HriManager/scripts/templates/public/json/videos.json".format(ws)) as data:
+        with open("{0}/src/HriManager/scripts/templates/public/json/videos.json".format(self.ws)) as data:
             self._videos = json.load(data)
 
         rospy.loginfo("{class_name}: JSON FILES LOADED.".format(class_name=self.__class__))
@@ -65,7 +70,7 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         try:
             self.people_name_by_id['John'] = "John"
             self.people_age_by_id['John'] = 40
-            self.people_drink_by_id['John'] = 'coke'
+            self.people_drink_by_id['John'] = 'Coke'
         except Exception as e:
             rospy.logerr("SCN : "+str(e))
 
@@ -110,7 +115,7 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
 
     def gm_ask_to_follow(self,indexStep):
         rospy.loginfo("SCN ACTION ASK TO FOLLOW")
-        self._lm_wrapper.timeboard_set_current_step(indexStep,self.NO_TIMEOUT)
+        self._lm_wrapper.timeboard_present_people(indexStep,deepcopy(self._people),self.NO_TIMEOUT)
         time.sleep(3)
         result={
             "NextIndex": indexStep+1
@@ -120,7 +125,13 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
     def gm_go_to(self,indexStep):
         rospy.loginfo("SCN ACTION GO TO")
         self._lm_wrapper.timeboard_set_current_step(indexStep,self.NO_TIMEOUT)
-        time.sleep(3)
+        if self.allow_navigation:
+            if "living room" in self.current_step['name']:
+                self.sendNavOrderAction("NP", "CRRCloseToGoal", "THOMAS_It0", 90.0)
+            else:
+                self.sendNavOrderAction("NP", "CRRCloseToGoal", "GPRS_PEOPLE_ENTRANCE_It0", 90.0)
+        else:
+            time.sleep(3)
         result={
             "NextIndex": indexStep+1
         }
@@ -128,18 +139,18 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
 
     def gm_point_to(self,indexStep):
         rospy.loginfo("SCN ACTION POINT TO")
-        self._lm_wrapper.timeboard_set_current_step(indexStep,self.NO_TIMEOUT)
+        self._lm_wrapper.timeboard_present_people(indexStep,deepcopy(self._people),self.NO_TIMEOUT)
         # raise NotImplementedError()
         # rospy.loginfo("SCN POINT TO PAS IMPLEMENTE")
-        time.sleep(3)
+        time.sleep(6)
         result={
             "NextIndex": indexStep+1
         }
         return result
 
-    def gm_present_person(self,indexStep,dict_people,dict_drink,dict_age):
+    def gm_present_person(self,indexStep):
         rospy.loginfo("SCN ACTION PRESENT PERSON")
-        self._lm_wrapper.timeboard_present_people(indexStep,dict_people,dict_drink,dict_age,self.NO_TIMEOUT)
+        self._lm_wrapper.timeboard_present_people(indexStep,deepcopy(self._people),self.NO_TIMEOUT)
         time.sleep(10)
         result={
             "NextIndex": indexStep+1
@@ -155,9 +166,9 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         }
         return result
 
-    def gm_seat_guest(self,indexStep,dict_people,dict_drink,dict_age):
+    def gm_seat_guest(self,indexStep):
         rospy.loginfo("SCN ACTION SEAT GUEST")
-        self._lm_wrapper.timeboard_present_people(indexStep,dict_people,dict_drink,dict_age,self.NO_TIMEOUT)        # raise NotImplementedError()
+        self._lm_wrapper.timeboard_present_people(indexStep,deepcopy(self._people),self.NO_TIMEOUT)        # raise NotImplementedError()
         time.sleep(3)
         result={
             "NextIndex": indexStep+1
@@ -182,17 +193,42 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         func = switcher.get(action, lambda: "Invalid action")
         
         # Execute the function
-        if action == "presentPerson" or action=='seatGuest':
-            copy_people=deepcopy(self.people_name_by_id)
-            copy_drink=deepcopy(self.people_drink_by_id)
-            copy_age=deepcopy(self.people_age_by_id)
-            return func(self.current_index_scenario,copy_people,copy_drink,copy_age)
-        else:
-            return func(self.current_index_scenario)
+        # if action == "presentPerson" or action=='seatGuest':
+        #     copy_people=deepcopy(self.people_name_by_id)
+        #     copy_drink=deepcopy(self.people_drink_by_id)
+        #     copy_age=deepcopy(self.people_age_by_id)
+        #     return func(self.current_index_scenario,copy_people,copy_drink,copy_age)
+        # else:
+        return func(self.current_index_scenario)
         
     def __del__(self):
         rospy.logwarn("SCN : ABOUT TO BE DESTROYED")
         del self._lm_wrapper
+
+    def write_in_JSON(self):
+        with open("{0}/src/HriManager/scripts/templates/public/json/people2.json".format(self.ws),"w+") as f:
+            data={}
+            for key in self.people_name_by_id.keys():
+                pathOnTablet=""
+                rospy.loginfo("SCN : DRINKS BY ID "+str(self.people_drink_by_id[key]))
+                for item in self._drinks:
+                    drink_guest=deepcopy(self.people_drink_by_id[key]).lower()
+                    drink_guest=drink_guest.title()
+                    if item['name']==drink_guest:
+                        pathOnTablet=item['pathOnTablet']
+                        break
+                
+                data[key]={
+                    "name": self.people_name_by_id[key],
+                    "guestPhotoPath": "img/people/"+key+".png",
+                    "drink": self.people_drink_by_id[key],
+                    "pathOnTablet": pathOnTablet
+                }
+            json.dump(data, f, indent=4)
+            f.truncate()
+
+        with open("{0}/src/HriManager/scripts/templates/public/json/people2.json".format(self.ws),"r") as f:
+            self._people=json.load(f)
 
     def startScenario(self):
         rospy.loginfo("""
@@ -260,6 +296,7 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
                     self.people_name_by_id[result['saveData']['who']]=result['saveData']['name']
                     self.people_drink_by_id[result['saveData']['who']]=result['saveData']['drink']
                     self.people_age_by_id[result['saveData']['who']]=result['saveData']['age']
+                    self.write_in_JSON()
                     # break
             
                 
@@ -540,8 +577,8 @@ class Receptionist2020CPEScenario(object):#AbstractScenario, AbstractScenarioBus
         self._enableResetPersonMetaInfoMapService = True
         self._enableReleaseArmsService = True
 
-        # AbstractScenarioAction.configure_intern(self)
-        # AbstractScenarioService.configure_intern(self)
+        AbstractScenarioAction.configure_intern(self)
+        AbstractScenarioService.configure_intern(self)
 
     def simulate_ros_work(self, time_for_work, log_string):
         rospy.logwarn(log_string)

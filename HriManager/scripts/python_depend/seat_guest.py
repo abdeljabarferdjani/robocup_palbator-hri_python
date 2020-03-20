@@ -15,13 +15,14 @@ class SeatGuest:
     def start(self,js_view_key, arguments, index, dataToUse):
         
         text = arguments['speech']['title']
-
+        people = arguments['arguments']['who']
         # text = arguments['speech']['name']
 
         dataJsonToSendCurrentView = {
                 "view": js_view_key,
                 "data": {
                     'textToShow': text,
+                    'people': people
                 },
                 "step":arguments,
                 "index":index
