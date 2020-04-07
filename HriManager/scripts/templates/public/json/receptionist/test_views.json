@@ -24,7 +24,7 @@
           "title": "What's your name?"
         },
         "arguments": {
-          "who": "Guest 1"
+          "who": "Guest_1"
         },
         "action": "askName",
         "id": "askinfog1_ask-name"
@@ -39,7 +39,7 @@
         },
         "arguments": {
           "what": "{name}",
-          "who": "Guest 1"
+          "who": "Guest_1"
         },
         "action": "confirm",
         "id": "askinfog1_confirm-name"
@@ -53,7 +53,7 @@
           "title": "What's your favorite drink?"
         },
         "arguments": {
-          "who": "Guest 1"
+          "who": "Guest_1"
         },
         "action": "askDrink",
         "id": "askinfog1_ask-drink"
@@ -68,7 +68,7 @@
         },
         "arguments": {
           "what": "{drinkId}",
-          "who": "Guest 1",
+          "who": "Guest_1",
           "timeout": 5
         },
         "action": "confirm",
@@ -83,7 +83,7 @@
           "title": "How old are you?"
         },
         "arguments": {
-          "who": "Guest 1"
+          "who": "Guest_1"
         },
         "action": "askAge",
         "id": "askinfog1_ask-age"
@@ -106,7 +106,7 @@
           "title": "What's your name?"
         },
         "arguments": {
-          "who": "Guest 2"
+          "who": "Guest_2"
         },
         "action": "askName",
         "id": "askinfog1_ask-name"
@@ -121,7 +121,7 @@
         },
         "arguments": {
           "what": "{name}",
-          "who": "Guest 2"
+          "who": "Guest_2"
         },
         "action": "confirm",
         "id": "askinfog1_confirm-name"
@@ -135,7 +135,7 @@
           "title": "What's your favorite drink?"
         },
         "arguments": {
-          "who": "Guest 2"
+          "who": "Guest_2"
         },
         "action": "askDrink",
         "id": "askinfog1_ask-drink"
@@ -150,7 +150,7 @@
         },
         "arguments": {
           "what": "{drinkId}",
-          "who": "Guest 2",
+          "who": "Guest_2",
           "timeout": 5
         },
         "action": "confirm",
@@ -165,7 +165,7 @@
           "title": "How old are you?"
         },
         "arguments": {
-          "who": "Guest 2"
+          "who": "Guest_2"
         },
         "action": "askAge",
         "id": "askinfog1_ask-age"

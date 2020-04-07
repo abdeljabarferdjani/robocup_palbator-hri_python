@@ -2,25 +2,23 @@
 
 
 from socketIO_client import SocketIO, LoggingNamespace
-# from __main__ import socketIO
 from python_depend.views import Views
 import json as js
 
 from std_msgs.msg import String
-from HriManager.msg import DataToSay
 import rospy
 import os 
 import actionlib
 from HriManager.msg import GmToHriAction, GmToHriFeedback, GmToHriResult
 import time
 import weakref
-# from testThomas_Receptionist2020CPEScenario import InterruptExecution
 from copy import deepcopy
 
 from python_depend.views import Views
 from std_msgs.msg import Empty
 from actionlib_msgs.msg import GoalID
-import rapp_platform_ros_communications.msg
+import speechToTextPalbator.msg
+import ttsMimic.msg
 
 class HRIManager:
 
@@ -30,21 +28,32 @@ class HRIManager:
   def __init__(self,socket):
     
     rospy.init_node("ROS_HRI_node",anonymous=True)
-    
-    self.pub_current_view=rospy.Publisher("CurrentView",DataToSay,queue_size=10)
-    self.subscriber=rospy.Subscriber("SendData",String,self.handle_data)
 
     self.pub_choice_scenario=rospy.Publisher("choice_scenario",String,queue_size=1)
-    self.pub_event_TM=rospy.Publisher("event_on_TM",String,queue_size=1)
-    self.pub_event_VM=rospy.Publisher("event_on_VM",String,queue_size=1)
-    self.pub_restart_request=rospy.Publisher("HRI_restart_request",String,queue_size=1)
+
+    self.action_online_client = actionlib.SimpleActionClient("action_STT_online",speechToTextPalbator.msg.SttOnlineAction)
+
+    self.action_offline_client = actionlib.SimpleActionClient("action_STT_offline",speechToTextPalbator.msg.SttOfflineAction)
+
+    self.client_TTS=actionlib.SimpleActionClient("action_TTS_MIMIC",ttsMimic.msg.TtsMimicAction)
+
+    rospy.loginfo("Waiting for online server...")
+    self.action_online_client.wait_for_server()
+    rospy.loginfo("Connected to server")
+
+    # rospy.loginfo("Waiting for offline server...")
+    # self.action_offline_client.wait_for_server()
+    # rospy.loginfo("Connected to offline server")
+
+    rospy.loginfo("Waiting for TTS server...")
+    self.client_TTS.wait_for_server()
+    rospy.loginfo("TTS server connected")
 
 
-    # self.pub_restart_mode=rospy.Publisher("restarting_mode",String,queue_size=1)
-    # self.sub_restart_mode=rospy.Subscriber("restarting_mode",String,self.handle_restart_mode)
-    # self.sub_server=rospy.Subscriber("test",Empty,self.handle_sub)
-    # self.sub_cancel_request=rospy.Subscriber("/action_GmToHri/cancel",GoalID,self.handle_cancel_action)
-    
+    # self.connection_ON=None
+    self.connection_ON=True
+
+    self.enable_changing_connection=True
     self.nameToUse=[]
     self.drinkToUse=[]
     self.ageToUse = []
@@ -66,21 +75,16 @@ class HRIManager:
     self.action_GM_TO_HRI_server=actionlib.SimpleActionServer("action_GmToHri",GmToHriAction,self.action_GmToHri_callback,auto_start=False)
     self.action_GM_TO_HRI_feedback=GmToHriFeedback()
     self.action_GM_TO_HRI_result=GmToHriResult()
-    self.action_GM_TO_HRI_server.start()
+    
     self.json_for_GM=None
-
-    self.client_action_tts=actionlib.SimpleActionClient("action_TTS",rapp_platform_ros_communications.msg.SayVocalSpeechAction)
-    rospy.loginfo("waiting for tts server...")
-    self.client_action_tts.wait_for_server()
-
     self.event_detected_flag=False
 
     self.stepsList=None
-    self.restart_order=False
     self.enable_choice_scenario=True
     
-    self.restart_mode="OFF"
     self.action_running=False
+
+    self.event_touch = False
 
     self.socketIO=socket
 
@@ -100,88 +104,96 @@ class HRIManager:
     # self.socketIO.on('resetHRI', self.restart_hri)
 
     self.view_launcher=Views(self.socketIO)
+    self.action_GM_TO_HRI_server.start()
+    self.sub = rospy.Subscriber("connection_state",String,self.handle_change_connection_state)
     rospy.loginfo('HRI MANAGER LAUNCHED')
 
-  def action_GmToHri_callback(self,goal):
-    if self.restart_mode=='OFF':
-      self.action_running=True
-      rospy.loginfo("Action initiating ...")
-      success=True
-      json_output=None
-      self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback=''
-      json_goal=js.loads(goal.json_request)
-      if json_goal['whatToDo']=="Load scenario":
-        self.scenario_loaded=False
-        rospy.loginfo("Getting steps list...")
-        self.stepsList=json_goal['stepsList']
-        self.choosen_scenario=json_goal['scenario']
-        self.json_for_GM={
-          "result": "Steps received"
-        }
+  def handle_change_connection_state(self,req):
+    if self.enable_changing_connection==True:
+      if req.data=='Connected':
+        self.action_offline_client.cancel_all_goals()
+        self.connection_ON=True
+          
+      elif req.data=='Disconnected':
+        self.action_online_client.cancel_all_goals()
+        self.connection_ON=False
 
-      elif json_goal['whatToDo']=="Load step":
-        if json_goal['stepIndex']==0:
-          json_charge_scenario={
-            'scenario': self.choosen_scenario
-          }
-          self.chargeScenario(json_charge_scenario)
-
-        which_step_action=deepcopy(self.stepsList[json_goal['stepIndex']]['action'])
-        which_step_name=deepcopy(self.stepsList[json_goal['stepIndex']]['name'])
-        
-        
-        ##### rajouter des conditions si nouvelles actions importantes
-        if which_step_action != '':
-          if which_step_action=='askOpenDoor':
-            #####procedure action askOpenDoor
-            self.procedure_action_askOpenDoor(json_goal['stepIndex'])
-
-          elif which_step_action=='presentPerson':
-            self.procedure_action_presentPerson(json_goal['stepIndex'],json_goal['people'])
-
-          elif which_step_action=='seatGuest':
-            self.procedure_action_seatGuest(json_goal['stepIndex'],json_goal['people'])
-
-          elif which_step_action=="pointTo":
-            self.procedure_action_pointTo(json_goal['stepIndex'],json_goal['people'])
-
-          elif which_step_action=='askToFollow':
-            self.procedure_action_askToFollow(json_goal['stepIndex'],json_goal['people'])
-
-          else:
-            #### procedure vue statique
-            self.procedure_static_view(json_goal['stepIndex'])
-        
-        else:
-          if "Ask infos" in which_step_name:
-            ##### procedure action guest infos
-            self.procedure_action_guest_infos(json_goal['stepIndex'])
-
-          else:
-            #### procedure vue statique
-            self.procedure_static_view(json_goal['stepIndex'])
-
-      json_output=self.json_for_GM
-      if 'result' in json_output and json_output['result']=='PREEMPTED':
-        success=False
-
-      self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
-      if success:
-        self.action_GM_TO_HRI_result.Gm_To_Hri_output=js.dumps(json_output)
-        rospy.loginfo("Action GM TO HRI succeeded")
-        
-        self.action_GM_TO_HRI_server.set_succeeded(self.action_GM_TO_HRI_result)
-      self.action_running=False
 
   def tts_action(self,speech):
-    self.enable_vocal_data=False
-    # self.client_action_tts.cancel_all_goals()
-    goal=rapp_platform_ros_communications.msg.SayVocalSpeechGoal(speech)
-    self.client_action_tts.send_goal(goal)
-    self.client_action_tts.wait_for_result()
-    result_action=self.client_action_tts.get_result()
-    rospy.loginfo("Action result "+str(result_action))
-    self.enable_vocal_data=True
+    self.goal_TTS=ttsMimic.msg.TtsMimicGoal(speech)
+    self.client_TTS.send_goal(self.goal_TTS)
+    self.client_TTS.wait_for_result()
+
+
+  def action_GmToHri_callback(self,goal):
+    self.action_running=True
+    rospy.loginfo("Action initiating ...")
+    success=True
+    json_output=None
+    self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback=''
+    json_goal=js.loads(goal.json_request)
+    if json_goal['whatToDo']=="Load scenario":
+      self.scenario_loaded=False
+      rospy.loginfo("Getting steps list...")
+      self.stepsList=json_goal['stepsList']
+      self.choosen_scenario=json_goal['scenario']
+      self.json_for_GM={
+        "result": "Steps received"
+      }
+
+    elif json_goal['whatToDo']=="Load step":
+      if json_goal['stepIndex']==0:
+        json_charge_scenario={
+          'scenario': self.choosen_scenario
+        }
+        self.chargeScenario(json_charge_scenario)
+
+      which_step_action=deepcopy(self.stepsList[json_goal['stepIndex']]['action'])
+      which_step_name=deepcopy(self.stepsList[json_goal['stepIndex']]['name'])
+      
+      
+      ##### rajouter des conditions si nouvelles actions importantes
+      if which_step_action != '':
+        if which_step_action=='askOpenDoor':
+          self.procedure_action_askOpenDoor(json_goal['stepIndex'])
+
+        elif which_step_action=='presentPerson':
+          self.procedure_action_presentPerson(json_goal['stepIndex'],json_goal['people'])
+
+        elif which_step_action=='seatGuest':
+          self.procedure_action_seatGuest(json_goal['stepIndex'],json_goal['people'])
+
+        elif which_step_action=="pointTo":
+          self.procedure_action_pointTo(json_goal['stepIndex'],json_goal['people'])
+
+        elif which_step_action=='askToFollow':
+          self.procedure_action_askToFollow(json_goal['stepIndex'],json_goal['people'])
+
+        else:
+          #### procedure vue statique
+          self.procedure_static_view(json_goal['stepIndex'])
+      
+      else:
+        if "Ask infos" in which_step_name:
+          ##### procedure action guest infos
+          self.procedure_action_guest_infos(json_goal['stepIndex'])
+
+        else:
+          #### procedure vue statique
+          self.procedure_static_view(json_goal['stepIndex'])
+
+    json_output=self.json_for_GM
+    if 'result' in json_output and json_output['result']=='PREEMPTED':
+      success=False
+
+    self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
+    if success:
+      self.action_GM_TO_HRI_result.Gm_To_Hri_output=js.dumps(json_output)
+      rospy.loginfo("Action GM TO HRI succeeded")
+      
+      self.action_GM_TO_HRI_server.set_succeeded(self.action_GM_TO_HRI_result)
+    self.action_running=False
+
 
   def procedure_action_askToFollow(self,indexStep,people):
     self.currentStep=deepcopy(self.stepsList[indexStep])
@@ -193,10 +205,6 @@ class HRIManager:
 
     self.view_launcher.start(self.currentAction,self.currentStep, self.index, self.dataToUse)
     rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-    messageDataToSay=DataToSay()
-    messageDataToSay.json_in_string=js.dumps(self.currentStep)
-    messageDataToSay.data_to_use_in_string=''
-    self.pub_current_view.publish(messageDataToSay)
 
     speech=deepcopy(self.currentStep['speech']['said'])
     self.tts_action(speech)
@@ -225,10 +233,6 @@ class HRIManager:
 
     self.view_launcher.start(self.currentAction,self.currentStep, self.index, self.dataToUse)
     rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-    messageDataToSay=DataToSay()
-    messageDataToSay.json_in_string=js.dumps(self.currentStep)
-    messageDataToSay.data_to_use_in_string=''
-    self.pub_current_view.publish(messageDataToSay)
 
     speech=deepcopy(self.currentStep['speech']['said'])
     self.tts_action(speech)
@@ -263,10 +267,6 @@ class HRIManager:
 
     self.view_launcher.start(self.currentAction,self.currentStep, self.index, self.dataToUse)
     rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-    messageDataToSay=DataToSay()
-    messageDataToSay.json_in_string=js.dumps(self.currentStep)
-    messageDataToSay.data_to_use_in_string=''
-    self.pub_current_view.publish(messageDataToSay)
 
     speech=deepcopy(self.currentStep['speech']['said'])
     self.tts_action(speech)
@@ -313,10 +313,7 @@ class HRIManager:
     self.currentStep['speech']['said']=speech
     self.view_launcher.start(self.currentAction,self.currentStep, self.index, self.dataToUse)
     rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-    messageDataToSay=DataToSay()
-    messageDataToSay.json_in_string=js.dumps(self.currentStep)
-    messageDataToSay.data_to_use_in_string=''
-    self.pub_current_view.publish(messageDataToSay)
+
     speech=deepcopy(self.currentStep['speech']['said'])
     self.tts_action(speech)
     self.json_for_GM={
@@ -367,10 +364,7 @@ class HRIManager:
     else:
       self.view_launcher.start(self.currentStep['action'],self.currentStep, self.currentStep['order'], self.dataToUse)
       rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-      messageDataToSay=DataToSay()
-      messageDataToSay.json_in_string=js.dumps(self.currentStep)
-      messageDataToSay.data_to_use_in_string=''
-      self.pub_current_view.publish(messageDataToSay)
+
       speech=deepcopy(self.currentStep['speech']['said'])
       self.tts_action(speech)
       self.json_for_GM={
@@ -382,8 +376,70 @@ class HRIManager:
       self.event_detected_flag=True
       self.socketIO.wait(seconds=0.1)
 
+  def routine_online(self):
+    rospy.loginfo("----------- DEBUT ROUTINE ONLINE--------------------------------")
+    self.goal_online = speechToTextPalbator.msg.SttOnlineGoal()
+    rospy.loginfo("Sending goal to online ...")
+    order={
+        'order': self.index,
+        'action': self.currentAction
+    }
+    json_in_str=js.dumps(order)
+    self.goal_online.order=json_in_str
+    self.action_online_client.send_goal(self.goal_online)
+    cp=0
+    while self.action_online_client.get_result() is None and not rospy.is_shutdown():
+      if cp==20 or self.connection_ON==False:
+        self.action_online_client.cancel_all_goals()
+        self.tts_action('Switching to offline mode')
+        break
+      elif self.event_touch == True:
+        self.action_online_client.cancel_all_goals()
+        break
+
+      rospy.loginfo("Waiting for online detect ....")
+      cp=cp+1
+      self.socketIO.wait(seconds=0.1)
+
+    rospy.loginfo(str(self.action_online_client.get_result()))
+    if not self.action_online_client.get_result() is None and self.action_online_client.get_result().stt_result != '':
+      self.dataToUse=str(self.action_online_client.get_result().stt_result)
+    elif self.event_touch==True:
+      self.event_touch = False
+      rospy.logwarn("EVENT TOUCH "+str(self.event_touch))
+    else:
+      self.enable_changing_connection=False
+      self.routine_offline()
+      self.enable_changing_connection=True
+
+    rospy.loginfo("----------- FIN ROUTINE ONLINE--------------------------------")
+
+  def routine_offline(self):
+    rospy.loginfo("----------- DEBUT ROUTINE OFFLINE--------------------------------")
+    self.goal_offline = speechToTextPalbator.msg.SttOfflineGoal()
+    rospy.loginfo("Sending goal to offline ...")
+    order={
+        'order': self.index,
+        'action': self.currentAction
+    }
+    json_in_str=js.dumps(order)
+    self.goal_offline.order=json_in_str
+    self.action_offline_client.send_goal(self.goal_offline)
+    while self.action_offline_client.get_result() is None and not rospy.is_shutdown():
+      if self.event_touch == True:
+        self.action_offline_client.cancel_all_goals()
+        self.event_touch = False
+        rospy.logwarn("EVENT TOUCH "+str(self.event_touch))
+        break
+      rospy.loginfo("Waiting for OFFLINE detect ....")
+      self.socketIO.wait(seconds=0.1)
+    rospy.loginfo(str(self.action_offline_client.get_result()))
+    if str(self.action_offline_client.get_result().stt_result) != '':
+      self.dataToUse=str(self.action_offline_client.get_result().stt_result)
+    rospy.loginfo("----------- FIN ROUTINE OFFLINE--------------------------------")
+
+
   def procedure_action_askOpenDoor(self,indexStep):
-    self.restart_order=False
     self.currentStep=deepcopy(self.stepsList[indexStep])
     self.index=deepcopy(self.currentStep['order'])
     self.nameAction = deepcopy(self.currentStep['name'])
@@ -391,31 +447,27 @@ class HRIManager:
 
     self.view_launcher.start(self.currentAction,self.currentStep, self.index, self.dataToUse)
     rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-    messageDataToSay=DataToSay()
-    messageDataToSay.json_in_string=js.dumps(self.currentStep)
-    messageDataToSay.data_to_use_in_string=''
-    self.pub_current_view.publish(messageDataToSay)
     speech=deepcopy(self.currentStep['speech']['said'])
     self.tts_action(speech)
 
-    ###wait for vocal data or touch data
-    self.event_detected_flag=False
-    while self.event_detected_flag==False:# and self.restart_order==False:
-      self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='Waiting for action TM or VM'
-      self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
-      if self.action_GM_TO_HRI_server.is_preempt_requested():
-        self.json_for_GM={
-          "result": "PREEMPTED"
-        }
-        break
-      self.socketIO.wait(seconds=0.1)
+    if self.connection_ON==True:
+      self.routine_online()
 
+    elif self.connection_ON==False:
+      self.routine_offline()
+    self.json_for_GM={
+            "indexStep": self.index,
+            "actionName": self.currentAction,
+            "dataToUse": self.dataToUse,
+            "NextToDo": "next",
+            "NextIndex": self.index+1
+          }
+    rospy.loginfo("----------END PROCEDURE ASK OPEN DOOR--------")
 
   def procedure_action_guest_infos(self,indexStep):
-    self.restart_order=False
     self.end_guest_procedure=False
     index_procedure=indexStep
-    while self.end_guest_procedure==False: #and self.restart_order==False:
+    while self.end_guest_procedure==False: 
       self.currentStep=deepcopy(self.stepsList[index_procedure])
       self.index=deepcopy(self.currentStep['order'])
 
@@ -449,8 +501,6 @@ class HRIManager:
         name = deepcopy(self.currentStep['name'])
         self.view_launcher.start(self.currentStep['action'],self.currentStep, self.index, self.dataToUse)
         rospy.loginfo("CHARGEMENT VUE SOUS ETAPE:"+self.currentStep['name'] +" SUR TABLETTE")
-        messageDataToSay=DataToSay()
-        messageDataToSay.json_in_string=js.dumps(self.currentStep)
 
         rospy.loginfo("CHOOSEN NAME :"+str(self.choosenName))
         rospy.loginfo("CONTENT NAMETOUSE "+str(self.nameToUse))
@@ -459,44 +509,55 @@ class HRIManager:
         rospy.loginfo("CONTENT DRINKTOUSE "+str(self.drinkToUse))
 
         speech=deepcopy(self.currentStep['speech']['said'])
-
+        title=deepcopy(self.currentStep['speech']['title'])
         if not self.dataToUse is None:
           if "Confirm" in name:
             if "drink" in name:
-              messageDataToSay.data_to_use_in_string=str(self.dataToUse)
               speech=speech.format(drink=str(self.dataToUse))
+              title=title.format(drink=str(self.dataToUse))
             elif "name" in name:
-              messageDataToSay.data_to_use_in_string=str(self.dataToUse)
               speech=speech.format(name=self.dataToUse)
+              title=title.format(name=self.dataToUse)
           else:
             if "drink" in name:
-              messageDataToSay.data_to_use_in_string=str(self.nameToUse[-1])
               speech=speech.format(name=str(self.nameToUse[-1]))
-        else:
-          messageDataToSay.data_to_use_in_string=''
-        self.pub_current_view.publish(messageDataToSay)
+
 
         
         self.tts_action(speech)
+        if self.connection_ON==True:
+          self.routine_online()
 
-        ###wait for vocal data or touch data
-        self.event_detected_flag=False
-        while self.event_detected_flag==False: # and self.restart_order==False:
-          rospy.loginfo('Waiting for action TM or VM')
-          self.action_GM_TO_HRI_feedback.Gm_To_Hri_feedback='Waiting for action TM or VM'
-          self.action_GM_TO_HRI_server.publish_feedback(self.action_GM_TO_HRI_feedback)
-          if self.action_GM_TO_HRI_server.is_preempt_requested():
-            self.json_for_GM={
-              "result": "PREEMPTED"
-            }
-            break
-          self.socketIO.wait(seconds=0.1)
+        elif self.connection_ON==False:
+          self.routine_offline()
 
+        if self.dataToUse != '':
+          if self.currentAction=='askName':
+            self.choosenName=self.dataToUse
+
+          elif self.currentAction=='askDrink':
+            self.choosenDrink=self.dataToUse
+
+          elif self.currentAction=='askAge':
+            self.choosenAge=self.dataToUse
+
+          elif self.currentAction=='confirm':
+            if self.dataToUse == 'true' or self.dataToUse == 'YES':
+              if "name" in self.currentStep['name']:
+                self.nameToUse.append(self.choosenName)
+              elif "drink" in self.currentStep['name']:
+                self.drinkToUse.append(self.choosenDrink)
+            elif self.dataToUse == 'false' or self.dataToUse == 'NO':
+              if "name" in self.currentAction:
+                self.choosenName=''
+              elif "drink" in self.currentAction:
+                self.choosenDrink=''
+        
         if "Confirm" in name:
-          if self.dataToUse=='false':
+          if self.dataToUse=='false' or self.dataToUse=='NO':
             rospy.loginfo("RECEIVED DATA -> FALSE")
             index_procedure=index_procedure-1
-          else:
+          elif self.dataToUse=='true' or self.dataToUse=='YES':
             rospy.loginfo("RECEIVED DATA -> TRUE")
             index_procedure=index_procedure+1
         else:
@@ -506,78 +567,20 @@ class HRIManager:
           self.end_guest_procedure=True
           break
       self.socketIO.wait(seconds=0.1)
-
-
-##################################### DATA RECEIVED FROM VOICE MANAGER #################################################
-
-  def handle_data(self,req):
-    data=req.data
-    json_received=js.loads(data)
-    if (self.data_received is False and self.index == json_received['index'] and self.enable_vocal_data is True):
-      self.dataToUse = json_received['dataToUse']
-      rospy.loginfo('CHARGEMENT DONNEE DE VOICE MANAGER')
-      rospy.loginfo('DONNEE RECUE DEPUIS VOICE MANAGER %s',json_received['dataToUse'])
-      self.data_received=True
-      if(self.currentAction != 'confirm'):
-        if self.currentAction != 'askName' and self.currentAction != 'askDrink' and self.currentAction != 'askAge':
-          
-          
-          self.json_for_GM={
-            "indexStep": self.index,
-            "actionName": self.currentAction,
-            "dataToUse": self.dataToUse,
-            "NextToDo": "next",
-            "NextIndex": self.index+1
-          }
-          self.event_detected_flag=True
-
-        else:
-          if self.currentAction== 'askAge':
-            rospy.loginfo("NAME LIST : "+str(self.nameToUse))
-            rospy.loginfo("DRINK LIST : "+str(self.drinkToUse))
-            self.json_for_GM={
-              "indexStep": self.index,
-              "actionName": self.currentAction,
-              "dataToUse": self.dataToUse,
-              "NextToDo": "next",
-              "NextIndex": self.index+1,
-              "saveData":{
-                "who": self.currentStep['arguments']['who'],
-                "name": self.nameToUse[-1],
-                "drink": self.drinkToUse[-1],
-                "age": self.dataToUse
-              }
-            }
-            self.event_detected_flag=True
-          else:
-            if self.currentAction== 'askName':
-              rospy.loginfo("CHOOSEN NAME BY VM : "+self.dataToUse)
-              self.choosenName=self.dataToUse
-            else:
-              rospy.loginfo("CHOOSEN DRINK BY VM : "+self.dataToUse)
-              self.choosenDrink=self.dataToUse
-            self.event_detected_flag=True
-
-      else:
-        if(json_received['dataToUse'] != 'false'):
-          if "name" in self.currentStep['name']:
-            self.nameToUse.append(self.choosenName)
-          elif "drink" in self.currentStep['name']:
-            self.drinkToUse.append(self.choosenDrink)
-          
-
-        else:
-          if "name" in self.currentAction:
-            self.choosenName=''
-          elif "drink" in self.currentAction:
-            self.choosenDrink=''
-        
-        self.event_detected_flag=True
-
-      self.data_received=False
-    else:
-      rospy.logwarn('Le voice Manager envoie une donnee a la mauvaise etape: '+str(json_received['index'])+' au lieu de '+str(self.index))
-
+    self.json_for_GM={
+      "indexStep": self.index,
+      "actionName": self.currentAction,
+      "dataToUse": self.dataToUse,
+      "NextToDo": "next",
+      "NextIndex": self.index+1,
+      "saveData":{
+        "who": self.currentStep['arguments']['who'],
+        "name": self.nameToUse[-1],
+        "drink": self.drinkToUse[-1],
+        "age": self.choosenAge
+      }
+    }
+    rospy.loginfo("--------END PROCEDURE ASK INFOS ABOUT GUEST-------------")
 
   def indexDataJSstepDone(self,json):
     if('data' in json):
@@ -585,9 +588,14 @@ class HRIManager:
 
 ##################################### DATA RECEIVED FROM TOUCH MANAGER #################################################
   def dataJSstepDone(self,json):
+    self.client_TTS.cancel_all_goals()
     self.event_detected_flag=True
+    self.event_touch = True
+    rospy.logwarn("EVENT TOUCH "+str(self.event_touch))
     if (self.data_received is False and self.index == self.currentIndexDataReceivedJS):
       rospy.loginfo("DONNEE RECUE DEPUIS TOUCH MANAGER")
+      self.action_online_client.cancel_all_goals()
+      self.action_offline_client.cancel_all_goals()
       self.data_received=True
       self.dataToUse = json['data']
       if(self.currentAction != 'confirm'):
@@ -608,6 +616,7 @@ class HRIManager:
           if self.currentAction=='askAge':
             rospy.loginfo("NAME LIST : "+str(self.nameToUse))
             rospy.loginfo("DRINK LIST : "+str(self.drinkToUse))
+            self.choosenAge=self.dataToUse
             self.json_for_GM={
               "indexStep": self.index,
               "actionName": self.currentAction,
@@ -648,6 +657,7 @@ class HRIManager:
       rospy.logwarn('Le touch Manager envoie une donnee a la mauvaise etape: '+str(self.currentIndexDataReceivedJS)+' au lieu de '+str(self.index))
 
     self.data_received=False
+    
   ###########################
 
   def scenarioCharged(self,json):
@@ -668,27 +678,11 @@ class HRIManager:
   ######### On recoit depuis le REACT le nom du scenario selectionne et on charge le json approprie pour lui renvoyer ############
   def chargeScenario(self,json):
       self.socketIO.emit('scenarioToCharged',json, broadcast=True)
-      # rospy.loginfo("SCENARIO CHARGE: "+str(json['scenario']))
   
   def send_gm_view_launched(self,json):
     self.json_confirm_View_launch=json
     rospy.loginfo(str(json['data']))
     rospy.loginfo("Index de la vue lancee sur le Touch : "+str(json['index']))
-
-  
-    # raise ValueError
-    # self.pub_restart_request.publish("restart")
-    
-
-    # self.json_for_GM_restart={
-    #   "actionName": "RESTART HRI",
-    #   "NextToDo": "",
-    #   "NextIndex": ""
-    # }
-    # self.restart_order=True
-    # # self.action_GM_TO_HRI_result.Gm_To_Hri_output=js.dumps(self.json_for_GM)
-    
-    # self.HRI_reconfigure()
 
   def restart_hri(self,json):
     self.nameToUse=[]
@@ -708,97 +702,18 @@ class HRIManager:
     self.data_received=False
     self.currentIndexDataReceivedJS=0
     self.end_guest_procedure=None
-
-    self.restart_mode='ON'
-
     
     socketIO.emit('restartHRI',broadcast=True)
     self.pub_restart_request.publish("RESTART")
 
 
-
-
-  
-# class HRILauncher(object):
-
-#   def __init__(self):
-#     rospy.init_node("hri_manager_node",anonymous=True)
-
-#     self.pub_restart=rospy.Publisher("HRI_restart_request", String,queue_size=1)
-    
-#     self.hri=HRIManager()
-
-#     #callback pour revenir au menu principal sur la tablette
-#     socketIO.on('resetHRI', self.restart_hri)
-
-
-#   def restart_hri(self,json):
-
-#     message_to_VoiceManager=DataToSay()
-#     dataJsonView={
-#       "order": 0,
-#       "action": None
-#     }
-#     message_to_VoiceManager.json_in_string=js.dumps(dataJsonView)
-#     message_to_VoiceManager.data_to_use_in_string=''
-#     self.hri.pub_current_view.publish(message_to_VoiceManager)
-
-
-    
-
-#     self.hri.action_GM_TO_HRI_server.set_preempted()
-#     del self.hri
-    
-#     self.pub_restart.publish("RESTART")
-#     time.sleep(1)
-#     socketIO.emit('restartHRI',broadcast=True)
-#     rospy.loginfo("RESTART HRI")
-    
-  
-#     # self.hri=HRIManager()
-    
-
-    
-
-# class Test:
-#   def __init__(self):
-    
-
-#   def restart(self,json):
-#     socketIO.emit('restartHRI',broadcast=True)
-#     rospy.logwarn("RESTART HRI")
-#     time.sleep(3)
-#     self.hri.pub_restart_request.publish("RESTART")
-#     # rospy.signal_shutdown("blabla")
-
 if __name__ == '__main__':
   
   
   socketIO = SocketIO('http://127.0.0.1', 5000, LoggingNamespace)
-  # from python_depend.views import Views
   hri=HRIManager(socketIO)
-  # hri_launcher=HRILauncher()
-  # hri = Test()
 
-  # #callback quand user choisit scenario sur tablette
-  # socketIO.on('askToChangeScenarioHRIM',hri.chooseScenario)
-
-  # #callback reponse quand scenario choisit et charge
-  # socketIO.on('scenarioCharged',hri.scenarioCharged)
-
-  # #callback quand on recoit des donnees de la tablette
-  # socketIO.on('indexDataReceivedJS', hri.indexDataJSstepDone)
-  # socketIO.on('dataReceivedJS', hri.dataJSstepDone)
-
-  #callback pour revenir au menu principal sur la tablette
-  # socketIO.on('resetHRI', hri.restart_hri)
-
-  # #recuperation de l'order de la view chargee par la tablette
-  # socketIO.on('launchedView', hri.send_gm_view_launched)
 
   while not rospy.is_shutdown():
-    # hri.pub_restart_mode.publish(hri.restart_mode)
-    # rospy.loginfo("RESTART MODE : "+hri.restart_mode)
     rospy.spin()
-    # socketIO.wait(seconds=1)
 

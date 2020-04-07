@@ -102,10 +102,10 @@ class GeneralManager:
             rospy.logwarn("Current Scenario is not ready (maybe not currently loaded), unable to start scenario...")
             return
         else:
-            if self._currentScenario._configurationReady:
-                self._currentScenario.startScenario()
-            else:
-                rospy.logwarn("Current Scenario is not ready, wait minutes and try again...")
+            # if self._currentScenario._configurationReady:
+            self._currentScenario.startScenario()
+            # else:
+            #     rospy.logwarn("Current Scenario is not ready, wait minutes and try again...")
 
     #######################################################################
     #######                LOAD Scenario config.                     ######

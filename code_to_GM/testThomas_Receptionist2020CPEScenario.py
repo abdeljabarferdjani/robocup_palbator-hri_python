@@ -20,12 +20,14 @@ from actionlib_msgs.msg import GoalStatus
 
 class Receptionist2020CPEScenario(AbstractScenario, AbstractScenarioBus,
                                   AbstractScenarioAction, AbstractScenarioService):
+# class Receptionist2020CPEScenario(object):
+
     DEFAULT_TIMEOUT = 5.0
     NO_TIMEOUT = -1.0
 
     def __init__(self, config):
-        AbstractScenarioBus.__init__(self, config)
-        AbstractScenarioAction.__init__(self, config)
+        # AbstractScenarioBus.__init__(self, config)
+        # AbstractScenarioAction.__init__(self, config)
         # self._lm_wrapper = LocalManagerWrapper(config.ip_address, config.tcp_port, config.prefix)
         
         # TODO : Remove Hardocoded values and get them from config
@@ -35,13 +37,13 @@ class Receptionist2020CPEScenario(AbstractScenario, AbstractScenarioBus,
         # with open(config.scenario_filepath) as data:
         self.ws = "/home/student/Bureau/workspace_palbator_dev"
 
-        with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/RECEPTIONIST_2020_CPE_SCENARIO.json".format(self.ws)) as data:
-            self._scenario = json.load(data)
-            self._scenario['name']='receptionist'
-
-        # with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/test_views.json".format(self.ws)) as data:
+        # with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/RECEPTIONIST_2020_CPE_SCENARIO.json".format(self.ws)) as data:
         #     self._scenario = json.load(data)
         #     self._scenario['name']='receptionist'
+
+        with open("{0}/src/HriManager/scripts/templates/public/json/receptionist/test_views.json".format(self.ws)) as data:
+            self._scenario = json.load(data)
+            self._scenario['name']='receptionist'
 
         with open("{0}/src/HriManager/scripts/templates/public/json/drinks.json".format(self.ws)) as data:
             self._drinks = json.load(data)
@@ -577,8 +579,8 @@ class Receptionist2020CPEScenario(AbstractScenario, AbstractScenarioBus,
         self._enableResetPersonMetaInfoMapService = True
         self._enableReleaseArmsService = True
 
-        AbstractScenarioAction.configure_intern(self)
-        AbstractScenarioService.configure_intern(self)
+        # AbstractScenarioAction.configure_intern(self)
+        # AbstractScenarioService.configure_intern(self)
 
     def simulate_ros_work(self, time_for_work, log_string):
         rospy.logwarn(log_string)

@@ -1,6 +1,7 @@
 GeneralManager:
   #config_folder: '/home/jsaraydaryan/ros_robotcupathome_ws/src/data/general_management'
-  config_folder: '/home/student/Bureau/projet_abdel/test_workspace_abdel/src/HriManager/scripts/templates/public/json/receptionist/'
+  #config_folder: '/home/xia0ben/pepper_ws/data/general_management'
+  config_folder: '/home/student/Bureau/workspace_palbator_dev/src/HriManager/scripts/templates/public/json/receptionist/'
   all_scenarios:
     - 'COCKTAIL_PARTY'
     - 'TEST_NAVIG'

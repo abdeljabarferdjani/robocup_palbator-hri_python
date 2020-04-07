@@ -41,8 +41,8 @@ class ttsMimicActionServer(object):
 
         self.get_current_index()
 
-        self.process=subprocess.Popen(['mimic','-t',str(text),'-o',self.path_to_wav+'record_'+str(self.current_index)+'.wav'],stdin=subprocess.PIPE, stdout=subprocess.PIPE,close_fds=True)
-        # self.process=subprocess.Popen(['mimic','-t',str(text)],stdin=subprocess.PIPE, stdout=subprocess.PIPE,close_fds=True)
+        # self.process=subprocess.Popen(['mimic','-t',str(text),'-o',self.path_to_wav+'record_'+str(self.current_index)+'.wav'],stdin=subprocess.PIPE, stdout=subprocess.PIPE,close_fds=True)
+        self.process=subprocess.Popen(['mimic','-t',str(text)],stdin=subprocess.PIPE, stdout=subprocess.PIPE,close_fds=True)
         
         # self.process.stdin.write(text)
         self.process.stdin.close()
