@@ -67,6 +67,7 @@ You can try Mimic using the command line : mimic -t "Hello world"
 - sudo apt-get install swig
 - sudo pip install pocketsphinx
 - sudo pip install SpeechRecognition
+
 If there are issues with pyaudio, those command lines could solve them:
 - sudo pip uninstall pyaudio or sudo apt-get purge --auto-remove python-pyaudio
 - sudo apt-get install portaudio19-dev python-all-dev python3-all-dev && sudo pip install pyaudio
