@@ -55,3 +55,21 @@ In order to completely launch the HRI,
 - sudo make install
 
 You can try Mimic using the command line : mimic -t "Hello world"
+
+## Launch ttsMimic
+- rosrun ttsMimic ttsMimicActionServer.py
+
+## Dependencies for speechToTextPalbator
+- sudo apt-get install -y python python-dev python-pip build-essential swig libpulse-dev git
+- sudo pip install pyttsx3
+- sudo apt-get install libasound-dev
+- sudo apt-get install python-pyaudio
+- sudo apt-get install swig
+- sudo pip install pocketsphinx
+- sudo pip install SpeechRecognition
+If there are issues with pyaudio, those command lines could solve them:
+- sudo pip uninstall pyaudio or sudo apt-get purge --auto-remove python-pyaudio
+- sudo apt-get install portaudio19-dev python-all-dev python3-all-dev && sudo pip install pyaudio
+
+## Launch speechToTextPalbator
+- roslaunch speechToTextPalbator stt_global.launch
