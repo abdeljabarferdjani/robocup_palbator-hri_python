@@ -54,4 +54,4 @@ In order to completely launch the HRI,
 - make check
 - sudo make install
 
-  You can try Mimic using the command line : mimic -t "Hello world"
+You can try Mimic using the command line : mimic -t "Hello world"
