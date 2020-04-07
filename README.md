@@ -43,3 +43,15 @@ In order to completely launch the HRI,
 
 ## Launch TTS Manager
 - roslaunch rapp_text_to_speech_espeak text_to_speech_espeak.launch
+
+## Dependencies for ttsMimic
+- sudo apt-get install gcc make pkg-config automake libtool libicu-dev libpcre2-dev libasound2-dev git
+- git clone https://github.com/MycroftAI/mimic.git
+- cd mimic
+- ./autogen.sh
+- ./configure --prefix="/usr/local"
+- make -j4
+- make check
+- sudo make install
+
+  You can try Mimic using the command line : mimic -t "Hello world"
