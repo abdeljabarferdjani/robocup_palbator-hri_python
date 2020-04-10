@@ -1,12 +1,18 @@
 <launch>
 
+    <arg name="config" default="$(find HriManager)/config/config_HRI.yaml" doc="Path to parameter config file"/>
+
+
     <node
         name="HRIManager"
         pkg="HriManager"
         type="HRIManager.py"
-        output="screen"
-	cwd="node"
-        />
+        output="screen">
+        <rosparam file="$(arg config)"/>
+    </node>
+
+	<!-- cwd="node"
+        /> -->
  
     <!--
     <node

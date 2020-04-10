@@ -20,6 +20,12 @@ from display_info import DisplayInfo
 from wait import Wait
 from point_to import PointTo
 from find import Find
+from ask_room_to_clean import AskRoomToClean
+from open_door import OpenDoor
+from found_object import FoundObject
+from catch_object import CatchObject
+from store_object import StoreObject
+from release_object import ReleaseObject
 
 class Views:
     def __init__(self,socket):
@@ -50,6 +56,13 @@ class Views:
             'wait': Wait, # time,
             'pointTo': PointTo,
             'find': Find,
+            'askRoomToClean': AskRoomToClean,
+            'openDoor': OpenDoor,
+            'foundObject': FoundObject,
+            'catchObject': CatchObject,
+            'storeObject': StoreObject,
+            'releaseObject': ReleaseObject
+
         }
         self.view=None
 
